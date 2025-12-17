@@ -2,7 +2,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../services/apiClient';
 import { Item, SaleItem, PaymentMethod, User, Sale, Refund } from '../types';
 import { ReceiptModal } from './ReceiptModal';
-import { ShoppingCart, Trash2, Plus, CreditCard, Banknote, FileText, Eraser, RotateCcw, XCircle, Search, AlertCircle, Eye } from 'lucide-react';
+import {
+  ShoppingCart,
+  Trash2,
+  Plus,
+  CreditCard,
+  Banknote,
+  FileText,
+  Eraser,
+  RotateCcw,
+  XCircle,
+  Search,
+  AlertCircle,
+  Eye,
+} from 'lucide-react';
 
 interface SalesPageProps {
   user: User;
@@ -24,7 +37,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [knetRef, setKnetRef] = useState('');
   const [chequeNum, setChequeNum] = useState('');
-  const [discountType, setDiscountType] = useState<'amount' | 'percent'>('amount');
+  const [discountType, setDiscountType] = useState<'amount' | 'percent'>('percent'); // default %
   const [discountValue, setDiscountValue] = useState<string>('0');
 
   // Sale Completion State
@@ -52,7 +65,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         const itemsData = await db.getItems();
         setItems(itemsData.filter(i => i.active !== false));
 
-        // Fetch recent sales
         const salesData = await db.getSales();
         setRecentSales(salesData.slice(-10).reverse());
       } catch (err) {
@@ -76,14 +88,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       const existingItemIndex = cart.findIndex(i => i.item_id === item.id);
 
       if (existingItemIndex >= 0) {
-        // Update existing
         const newCart = [...cart];
         newCart[existingItemIndex].quantity += qty;
         newCart[existingItemIndex].line_total =
           newCart[existingItemIndex].quantity * newCart[existingItemIndex].unit_price;
         setCart(newCart);
       } else {
-        // Add new
         setCart([
           ...cart,
           {
@@ -96,7 +106,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           },
         ]);
       }
-      // Reset inputs
       setSelectedItemId('');
       setQtyInput('1');
     }
@@ -123,7 +132,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   };
 
   const clearCart = () => {
-    if (window.confirm('Are you sure you want to clear the cart?')) {
+    if (window.confirm('Are you sure you want to clear the cart? / هل أنت متأكد من مسح السلة؟')) {
       setCart([]);
       setDiscountValue('0');
       setKnetRef('');
@@ -134,7 +143,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   };
 
   // Calculations
-  const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.line_total, 0), [cart]);
+  const subtotal = useMemo(
+    () => cart.reduce((acc, item) => acc + item.line_total, 0),
+    [cart],
+  );
 
   const discountCalc = useMemo(() => {
     const val = parseFloat(discountValue) || 0;
@@ -153,7 +165,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const isChequeInvalid = paymentMethod === 'cheque' && !chequeNum.trim();
   const isPaymentSelected = paymentMethod !== null;
   const isCartEmpty = cart.length === 0;
-  const canSubmit = !isCartEmpty && !isKnetInvalid && !isChequeInvalid && isPaymentSelected && !processing;
+  const canSubmit =
+    !isCartEmpty && !isKnetInvalid && !isChequeInvalid && isPaymentSelected && !processing;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -175,11 +188,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       });
 
       setCompletedSale(sale);
-
-      // Add to recent sales
       setRecentSales([sale, ...recentSales].slice(0, 10));
 
-      // Reset form
       setCart([]);
       setKnetRef('');
       setChequeNum('');
@@ -209,7 +219,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       if (sale) {
         setRefundSaleData(sale);
       } else {
-        setRefundError('Sale not found');
+        setRefundError('Sale not found / لم يتم العثور على الفاتورة');
         setRefundSaleData(null);
       }
     } catch (err) {
@@ -224,7 +234,11 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const handleProcessRefund = async () => {
     if (!refundSaleData || !refundReason.trim()) return;
 
-    const confirmMsg = `Process full refund of ${Number(refundSaleData.total_amount).toFixed(3)} KWD for Sale ${refundSaleData.sale_number}?`;
+    const confirmMsg = `Process full refund of ${Number(
+      refundSaleData.total_amount,
+    ).toFixed(3)} KWD for Sale ${refundSaleData.sale_number}? / هل تريد تنفيذ استرجاع كامل بمبلغ ${
+      refundSaleData.total_amount
+    } دينار لفاتورة ${refundSaleData.sale_number}؟`;
     if (!confirm(confirmMsg)) return;
 
     setProcessing(true);
@@ -234,7 +248,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       const refund = await db.createRefund(
         refundSaleData.id,
         Number(refundSaleData.total_amount),
-        refundReason.trim()
+        refundReason.trim(),
       );
 
       setCompletedRefund(refund);
@@ -265,7 +279,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       <div className="min-h-screen flex items-center justify-center bg-slate-100">
         <div className="flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-slate-600 font-medium">Loading items...</p>
+          <p className="text-slate-600 font-medium">
+            Loading items... / جارٍ تحميل المنتجات...
+          </p>
         </div>
       </div>
     );
@@ -280,8 +296,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             <ShoppingCart className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-800 leading-none">POS Terminal</h1>
-            <span className="text-xs text-slate-500 font-medium">Cashier: {user.name}</span>
+            <h1 className="text-xl font-bold text-slate-800 leading-none">
+              POS Terminal / نقطة بيع
+            </h1>
+            <span className="text-xs text-slate-500 font-medium">
+              Cashier: {user.name} / الكاشير: {user.name}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -289,19 +309,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             onClick={() => setShowSalesHistory(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 text-sm font-medium transition-colors"
           >
-            <Eye className="w-4 h-4" /> Sales History
+            <Eye className="w-4 h-4" />
+            Sales History / سجل المبيعات
           </button>
           <button
             onClick={() => setShowRefundModal(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 text-sm font-medium transition-colors"
           >
-            <RotateCcw className="w-4 h-4" /> Refund
+            <RotateCcw className="w-4 h-4" />
+            Refund / استرجاع
           </button>
           <button
             onClick={onLogout}
             className="text-sm text-slate-500 hover:text-red-600 font-medium ml-4"
           >
-            Logout
+            Logout / تسجيل الخروج
           </button>
         </div>
       </header>
@@ -310,11 +332,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       {error && (
         <div className="bg-red-50 border-b border-red-200 px-6 py-3 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-          <span className="text-sm text-red-700">{error}</span>
-          <button
-            onClick={() => setError('')}
-            className="ml-auto text-red-600 hover:text-red-800"
-          >
+          <span className="text-sm text-red-700">
+            {error} / حدث خطأ: {error}
+          </span>
+          <button onClick={() => setError('')} className="ml-auto text-red-600 hover:text-red-800">
             ×
           </button>
         </div>
@@ -322,16 +343,17 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
 
       {/* Content Area */}
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-        {/* Left Column: Product Selection & Cart */}
+        {/* Left Column */}
         <div className="flex-1 flex flex-col overflow-y-auto p-4 lg:p-6 gap-6">
           {/* Quick Select Grid */}
           <div className="shrink-0">
             <h2 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wide">
-              Quick Select Product
+              Quick Select Product / اختيار سريع للمنتج
             </h2>
             {items.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-                No active items available. Please contact administrator.
+                No active items available. Please contact administrator. / لا توجد منتجات
+                مفعّلة، يرجى التواصل مع المسؤول.
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -348,17 +370,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     <div className="font-bold text-lg mb-1">{item.name_en}</div>
                     <div
                       className={`text-sm mb-2 font-arabic ${
-                        selectedItemId === item.id.toString() ? 'text-blue-100' : 'text-slate-500'
+                        selectedItemId === item.id.toString()
+                          ? 'text-blue-100'
+                          : 'text-slate-500'
                       }`}
                     >
                       {item.name_ar}
                     </div>
                     <div
                       className={`font-mono font-medium ${
-                        selectedItemId === item.id.toString() ? 'text-white' : 'text-blue-600'
+                        selectedItemId === item.id.toString()
+                          ? 'text-white'
+                          : 'text-blue-600'
                       }`}
                     >
-                      {Number(item.price_per_unit).toFixed(3)} KWD
+                      {Number(item.price_per_unit).toFixed(3)} KWD / د.ك
                     </div>
                     {selectedItemId === item.id.toString() && (
                       <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
@@ -374,24 +400,24 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             <div className="flex flex-col md:flex-row gap-4 items-end">
               <div className="flex-1 w-full">
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
-                  Selected Item
+                  Selected Item / المنتج المختار
                 </label>
                 <select
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50"
                   value={selectedItemId}
                   onChange={e => setSelectedItemId(e.target.value)}
                 >
-                  <option value="">-- Select Product --</option>
+                  <option value="">-- Select Product / اختر منتج --</option>
                   {items.map(item => (
                     <option key={item.id} value={item.id}>
-                      {item.name_en} - {Number(item.price_per_unit).toFixed(3)} KWD
+                      {item.name_en} - {Number(item.price_per_unit).toFixed(3)} KWD / د.ك
                     </option>
                   ))}
                 </select>
               </div>
               <div className="w-full md:w-40">
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
-                  Quantity (CBM)
+                  Quantity (CBM) / الكمية (م³)
                 </label>
                 <input
                   id="qtyInput"
@@ -409,7 +435,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 disabled={!selectedItemId}
                 className="w-full md:w-auto bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
-                <Plus className="w-5 h-5" /> Add to Cart
+                <Plus className="w-5 h-5" />
+                Add to Cart / أضف إلى السلة
               </button>
             </div>
           </div>
@@ -418,18 +445,20 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[300px]">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center shrink-0">
               <h2 className="font-bold text-slate-800 flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-slate-600" /> Current Order
+                <ShoppingCart className="w-5 h-5 text-slate-600" />
+                Current Order / الطلب الحالي
               </h2>
               <div className="flex items-center gap-4">
                 <span className="text-sm font-medium text-slate-600 bg-white px-3 py-1 rounded border">
-                  {cart.length} items
+                  {cart.length} items / عنصر
                 </span>
                 {cart.length > 0 && (
                   <button
                     onClick={clearCart}
                     className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 font-medium px-2 py-1 rounded hover:bg-red-50"
                   >
-                    <Eraser className="w-3 h-3" /> Clear Cart
+                    <Eraser className="w-3 h-3" />
+                    Clear Cart / مسح السلة
                   </button>
                 )}
               </div>
@@ -439,21 +468,25 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8">
                   <ShoppingCart className="w-12 h-12 mb-2 opacity-20" />
-                  <p className="italic">Cart is empty. Select items to begin.</p>
+                  <p className="italic">
+                    Cart is empty. Select items to begin. / السلة فارغة، اختر المنتجات للبدء.
+                  </p>
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
                     <tr>
-                      <th className="p-4 text-xs font-bold text-slate-500 uppercase">Product</th>
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase">
+                        Product / المنتج
+                      </th>
                       <th className="p-4 text-xs font-bold text-slate-500 uppercase text-center w-32">
-                        Qty (CBM)
+                        Qty (CBM) / الكمية (م³)
                       </th>
                       <th className="p-4 text-xs font-bold text-slate-500 uppercase text-right">
-                        Unit Price
+                        Unit Price / سعر الوحدة
                       </th>
                       <th className="p-4 text-xs font-bold text-slate-500 uppercase text-right">
-                        Line Total
+                        Line Total / الإجمالي
                       </th>
                       <th className="p-4 text-xs font-bold text-slate-500 uppercase w-12"></th>
                     </tr>
@@ -463,7 +496,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                       <tr key={idx} className="hover:bg-blue-50/50 transition-colors">
                         <td className="p-4">
                           <div className="font-bold text-slate-800">{item.item_name_en}</div>
-                          <div className="text-xs text-slate-500 font-arabic">{item.item_name_ar}</div>
+                          <div className="text-xs text-slate-500 font-arabic">
+                            {item.item_name_ar}
+                          </div>
                         </td>
                         <td className="p-4 text-center">
                           <input
@@ -472,14 +507,16 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                             step="0.01"
                             className="w-24 p-2 border border-slate-300 rounded text-center focus:ring-2 focus:ring-blue-500 outline-none font-medium bg-white"
                             value={item.quantity}
-                            onChange={e => updateCartItemQty(idx, parseFloat(e.target.value) || 0)}
+                            onChange={e =>
+                              updateCartItemQty(idx, parseFloat(e.target.value) || 0)
+                            }
                           />
                         </td>
                         <td className="p-4 text-right text-slate-600 font-mono">
-                          {Number(item.unit_price).toFixed(3)}
+                          {Number(item.unit_price).toFixed(3)} KWD / د.ك
                         </td>
                         <td className="p-4 text-right font-bold text-slate-800 font-mono">
-                          {Number(item.line_total).toFixed(3)}
+                          {Number(item.line_total).toFixed(3)} KWD / د.ك
                         </td>
                         <td className="p-4 text-center">
                           <button
@@ -497,8 +534,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             </div>
             {cart.length > 0 && (
               <div className="p-4 bg-slate-50 border-t border-slate-200 text-right">
-                <span className="text-sm text-slate-500 mr-2">Subtotal:</span>
-                <span className="text-lg font-bold text-slate-800">{subtotal.toFixed(3)} KWD</span>
+                <span className="text-sm text-slate-500 mr-2">
+                  Subtotal / المجموع الفرعي:
+                </span>
+                <span className="text-lg font-bold text-slate-800">
+                  {subtotal.toFixed(3)} KWD / د.ك
+                </span>
               </div>
             )}
           </div>
@@ -509,19 +550,23 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           <div className="p-6 flex flex-col h-full">
             <h2 className="text-lg font-bold text-slate-800 mb-6 pb-4 border-b flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-slate-600" />
-              Payment Details
+              Payment Details / تفاصيل الدفع
             </h2>
 
             {/* Calculations */}
             <div className="space-y-4 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex justify-between text-slate-600 text-sm">
-                <span>Subtotal</span>
-                <span className="font-mono font-medium">{subtotal.toFixed(3)} KWD</span>
+                <span>Subtotal / المجموع الفرعي</span>
+                <span className="font-mono font-medium">
+                  {subtotal.toFixed(3)} KWD / د.ك
+                </span>
               </div>
 
               {/* Discount */}
               <div>
-                <label className="text-xs text-slate-500 block mb-1 font-bold">DISCOUNT</label>
+                <label className="text-xs text-slate-500 block mb-1 font-bold">
+                  DISCOUNT / الخصم
+                </label>
                 <div className="flex gap-2 items-center">
                   <div className="flex border border-slate-300 rounded-lg overflow-hidden bg-white flex-1">
                     <input
@@ -540,7 +585,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                             : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                         }`}
                       >
-                        KWD
+                        KWD / د.ك
                       </button>
                       <button
                         onClick={() => setDiscountType('percent')}
@@ -563,9 +608,14 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               </div>
 
               <div className="pt-4 border-t border-slate-200 flex justify-between items-end">
-                <span className="text-lg font-bold text-slate-800">TOTAL DUE</span>
+                <span className="text-lg font-bold text-slate-800">
+                  TOTAL DUE / المبلغ المستحق
+                </span>
                 <span className="text-3xl font-extrabold text-blue-600 leading-none">
-                  {totalAmount.toFixed(3)} <span className="text-sm text-slate-500 font-normal">KWD</span>
+                  {totalAmount.toFixed(3)}{' '}
+                  <span className="text-sm text-slate-500 font-normal">
+                    KWD / د.ك
+                  </span>
                 </span>
               </div>
             </div>
@@ -573,14 +623,15 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             {/* Payment Method Selector */}
             <div className="space-y-4 mb-8 flex-1">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                Select Payment Method <span className="text-red-500">*</span>
+                Select Payment Method / اختر طريقة الدفع{' '}
+                <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: 'cash', label: 'Cash', icon: Banknote },
-                  { id: 'knet', label: 'KNET', icon: CreditCard },
-                  { id: 'cheque', label: 'Cheque', icon: FileText },
-                  { id: 'credit', label: 'Credit', icon: CreditCard },
+                  { id: 'cash', label: 'Cash / نقداً', icon: Banknote },
+                  { id: 'knet', label: 'KNET / كي نت', icon: CreditCard },
+                  { id: 'cheque', label: 'Cheque / شيك', icon: FileText },
+                  { id: 'credit', label: 'Credit / أجل', icon: CreditCard },
                 ].map(method => {
                   const Icon = method.icon;
                   const isSelected = paymentMethod === method.id;
@@ -612,11 +663,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               {paymentMethod === 'knet' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm">
                   <label className="block text-xs font-bold text-blue-800 mb-1 uppercase">
-                    KNET Reference Number <span className="text-red-500">*</span>
+                    KNET Reference Number / رقم مرجع كي نت{' '}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter reference number"
+                    placeholder="Enter reference number / أدخل رقم المرجع"
                     className={`w-full p-3 border rounded-lg outline-none focus:ring-2 font-mono ${
                       !knetRef
                         ? 'border-red-300 focus:ring-red-200 bg-white'
@@ -627,7 +679,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     autoFocus
                   />
                   {!knetRef && (
-                    <p className="text-xs text-red-500 mt-1 font-medium">Reference is mandatory.</p>
+                    <p className="text-xs text-red-500 mt-1 font-medium">
+                      Reference is mandatory. / رقم المرجع إجباري.
+                    </p>
                   )}
                 </div>
               )}
@@ -635,11 +689,11 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               {paymentMethod === 'cheque' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
                   <label className="block text-xs font-bold text-slate-700 mb-1 uppercase">
-                    Cheque Number <span className="text-red-500">*</span>
+                    Cheque Number / رقم الشيك <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter cheque number"
+                    placeholder="Enter cheque number / أدخل رقم الشيك"
                     className={`w-full p-3 border rounded-lg outline-none focus:ring-2 font-mono ${
                       !chequeNum
                         ? 'border-red-300 focus:ring-red-200 bg-white'
@@ -649,7 +703,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     onChange={e => setChequeNum(e.target.value)}
                   />
                   {!chequeNum && (
-                    <p className="text-xs text-red-500 mt-1 font-medium">Cheque number is mandatory.</p>
+                    <p className="text-xs text-red-500 mt-1 font-medium">
+                      Cheque number is mandatory. / رقم الشيك إجباري.
+                    </p>
                   )}
                 </div>
               )}
@@ -669,30 +725,38 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 {processing ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Processing...
+                    Processing... / جارٍ المعالجة...
                   </>
                 ) : (
                   <>
-                    Complete Sale{' '}
+                    Complete Sale / إنهاء البيع{' '}
                     <span className="bg-green-700 px-2 py-0.5 rounded text-sm">
-                      {totalAmount.toFixed(3)} KWD
+                      {totalAmount.toFixed(3)} KWD / د.ك
                     </span>
                   </>
                 )}
               </button>
 
               <div className="mt-3 text-center min-h-[1.5rem]">
-                {isCartEmpty && <p className="text-xs text-slate-400">Cart is empty.</p>}
+                {isCartEmpty && (
+                  <p className="text-xs text-slate-400">
+                    Cart is empty. / السلة فارغة.
+                  </p>
+                )}
                 {!isCartEmpty && !isPaymentSelected && (
                   <p className="text-xs text-red-500 font-medium animate-pulse">
-                    Select a payment method.
+                    Select a payment method. / اختر طريقة الدفع.
                   </p>
                 )}
                 {!isCartEmpty && isKnetInvalid && (
-                  <p className="text-xs text-red-500 font-medium">KNET reference required.</p>
+                  <p className="text-xs text-red-500 font-medium">
+                    KNET reference required. / رقم مرجع كي نت مطلوب.
+                  </p>
                 )}
                 {!isCartEmpty && isChequeInvalid && (
-                  <p className="text-xs text-red-500 font-medium">Cheque number required.</p>
+                  <p className="text-xs text-red-500 font-medium">
+                    Cheque number required. / رقم الشيك مطلوب.
+                  </p>
                 )}
               </div>
             </div>
@@ -701,7 +765,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       </div>
 
       {/* Receipts */}
-      {completedSale && <ReceiptModal sale={completedSale} onClose={() => setCompletedSale(null)} />}
+      {completedSale && (
+        <ReceiptModal sale={completedSale} onClose={() => setCompletedSale(null)} />
+      )}
 
       {completedRefund && (
         <ReceiptModal refund={completedRefund} onClose={() => setCompletedRefund(null)} />
@@ -716,7 +782,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 <div className="bg-red-100 p-2 rounded-full">
                   <RotateCcw className="w-5 h-5 text-red-600" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-800">Process Refund</h2>
+                <h2 className="text-xl font-bold text-slate-800">
+                  Process Refund / تنفيذ استرجاع
+                </h2>
               </div>
               <button
                 onClick={closeRefundModal}
@@ -737,7 +805,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Original Sale Number
+                    Original Sale Number / رقم الفاتورة الأصلية
                   </label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
@@ -748,7 +816,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                         className="w-full pl-10 p-3 border border-slate-300 rounded-xl uppercase font-mono focus:ring-2 focus:ring-blue-500 outline-none"
                         value={refundSaleIdInput}
                         onChange={e => setRefundSaleIdInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSearchSaleForRefund()}
+                        onKeyDown={e =>
+                          e.key === 'Enter' && handleSearchSaleForRefund()
+                        }
                       />
                     </div>
                     <button
@@ -756,11 +826,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                       disabled={refundSearching}
                       className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors"
                     >
-                      {refundSearching ? 'Searching...' : 'Find'}
+                      {refundSearching ? 'Searching... / جارٍ البحث...' : 'Find / بحث'}
                     </button>
                   </div>
                   <p className="text-xs text-slate-400 mt-2">
-                    Enter the full sale number found on the receipt.
+                    Enter the full sale number found on the receipt. / أدخل رقم الفاتورة
+                    الموجود على الإيصال.
                   </p>
                 </div>
               </div>
@@ -768,40 +839,50 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               <div className="space-y-6">
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-2">
                   <div className="flex justify-between border-b border-slate-200 pb-2">
-                    <span className="text-slate-500">Sale Number</span>
+                    <span className="text-slate-500">Sale Number / رقم الفاتورة</span>
                     <span className="font-bold font-mono text-slate-800">
                       {refundSaleData.sale_number}
                     </span>
                   </div>
                   <div className="flex justify-between border-b border-slate-200 pb-2">
-                    <span className="text-slate-500">Total Amount</span>
+                    <span className="text-slate-500">Total Amount / المبلغ الإجمالي</span>
                     <span className="font-bold text-slate-800">
-                      {Number(refundSaleData.total_amount).toFixed(3)} KWD
+                      {Number(refundSaleData.total_amount).toFixed(3)} KWD / د.ك
                     </span>
                   </div>
-                  <div>
-                    <span className="block text-slate-500 mb-1">Items</span>
-                    <div className="font-medium text-slate-800 bg-white p-2 rounded border border-slate-100">
-                      {refundSaleData.items.map(i => i.item_name_en).join(', ')}
-                    </div>
-                  </div>
-                </div>
+<div>
+  <span className="block text-slate-500 mb-1">Items / العناصر</span>
+  <div className="font-medium text-slate-800 bg-white p-2 rounded border border-slate-100">
+    {(refundSaleData.items ?? [])
+      .map(i => i.item_name_en)
+      .join(', ') || '—'}
+  </div>
+</div>                </div>
 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Select Refund Reason <span className="text-red-500">*</span>
+                    Select Refund Reason / اختر سبب الاسترجاع{' '}
+                    <span className="text-red-500">*</span>
                   </label>
                   <select
                     className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                     value={refundReason}
                     onChange={e => setRefundReason(e.target.value)}
                   >
-                    <option value="">-- Choose Reason --</option>
-                    <option value="Customer returned items">Customer returned items</option>
-                    <option value="Damaged goods">Damaged goods</option>
-                    <option value="Incorrect order">Incorrect order</option>
-                    <option value="Customer request">Customer request</option>
-                    <option value="Other">Other</option>
+                    <option value="">-- Choose Reason / اختر السبب --</option>
+                    <option value="Customer returned items">
+                      Customer returned items / قام العميل بإرجاع البضاعة
+                    </option>
+                    <option value="Damaged goods">
+                      Damaged goods / بضاعة تالفة
+                    </option>
+                    <option value="Incorrect order">
+                      Incorrect order / طلب غير صحيح
+                    </option>
+                    <option value="Customer request">
+                      Customer request / طلب العميل
+                    </option>
+                    <option value="Other">Other / أخرى</option>
                   </select>
                 </div>
 
@@ -813,10 +894,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                   {processing ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Processing Refund...
+                      Processing Refund... / جارٍ تنفيذ الاسترجاع...
                     </>
                   ) : (
-                    'Confirm Refund'
+                    'Confirm Refund / تأكيد الاسترجاع'
                   )}
                 </button>
               </div>
@@ -831,7 +912,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           <div className="bg-white w-full max-w-3xl max-h-96 rounded-2xl shadow-2xl transform transition-all flex flex-col overflow-hidden">
             <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <Eye className="w-5 h-5" /> Recent Sales
+                <Eye className="w-5 h-5" />
+                Recent Sales / آخر المبيعات
               </h2>
               <button
                 onClick={() => setShowSalesHistory(false)}
@@ -845,35 +927,55 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               {recentSales.length === 0 ? (
                 <div className="p-8 text-center text-slate-500">
                   <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                  <p>No sales yet.</p>
+                  <p>No sales yet. / لا توجد مبيعات بعد.</p>
                 </div>
               ) : (
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 sticky top-0">
                     <tr>
-                      <th className="p-3 text-left font-bold text-slate-700">Sale #</th>
-                      <th className="p-3 text-left font-bold text-slate-700">Date/Time</th>
-                      <th className="p-3 text-right font-bold text-slate-700">Amount</th>
-                      <th className="p-3 text-left font-bold text-slate-700">Payment</th>
-                      <th className="p-3 text-left font-bold text-slate-700">Status</th>
+                      <th className="p-3 text-left font-bold text-slate-700">
+                        Sale # / رقم الفاتورة
+                      </th>
+                      <th className="p-3 text-left font-bold text-slate-700">
+                        Date/Time / التاريخ والوقت
+                      </th>
+                      <th className="p-3 text-right font-bold text-slate-700">
+                        Amount / المبلغ
+                      </th>
+                      <th className="p-3 text-left font-bold text-slate-700">
+                        Payment / الدفع
+                      </th>
+                      <th className="p-3 text-left font-bold text-slate-700">
+                        Status / الحالة
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {recentSales.map(sale => (
                       <tr key={sale.id} className="hover:bg-slate-50">
-                        <td className="p-3 font-mono text-blue-600 font-bold">{sale.sale_number}</td>
+                        <td className="p-3 font-mono text-blue-600 font-bold">
+                          {sale.sale_number}
+                        </td>
                         <td className="p-3 text-slate-600">
                           {new Date(sale.sale_date).toLocaleString()}
                         </td>
                         <td className="p-3 text-right font-bold text-slate-800">
-                          {Number(sale.total_amount).toFixed(3)} KWD
+                          {Number(sale.total_amount).toFixed(3)} KWD / د.ك
                         </td>
-                        <td className="p-3 capitalize text-slate-600">{sale.payment_method}</td>
+                        <td className="p-3 capitalize text-slate-600">
+                          {sale.payment_method}
+                        </td>
                         <td className="p-3">
-                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                            sale.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                          }`}>
-                            {sale.status}
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-bold ${
+                              sale.status === 'completed'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {sale.status === 'completed'
+                              ? 'completed / مكتملة'
+                              : 'refunded / مسترجعة'}
                           </span>
                         </td>
                       </tr>
