@@ -30,7 +30,7 @@ app.use(cors({
     'http://192.168.1.3:5173',
     'http://192.168.1.3:5174',
     'http://192.168.1.3:3001',
-    'https://pos-apex-gp12d0le4-iammudumenon-gmailcoms-projects.vercel.app'
+    'https://pos-apex.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
