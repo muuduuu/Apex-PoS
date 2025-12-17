@@ -13,6 +13,7 @@ import {
   Plus,
   Trash2,
   X,
+  Users as UsersIcon,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -21,7 +22,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'audit' | 'users'>('overview');
   const [report, setReport] = useState<DailyReport | null>(null);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
   // Audit State
   const [logs, setLogs] = useState<AuditLog[]>([]);
+
+  // Users State
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState<'cashier' | 'admin'>('cashier');
+  const [userLoading, setUserLoading] = useState(false);
+  const [userSuccess, setUserSuccess] = useState('');
 
   const format3 = (v: any) => Number(v || 0).toFixed(3);
   const format2 = (v: any) => Number(v || 0).toFixed(2);
@@ -187,17 +195,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     }
   };
 
+  // Handle Create New User
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setUserSuccess('');
+
+    if (!newUsername || !newPassword) {
+      setError('Username and password are required');
+      return;
+    }
+
+    try {
+      setUserLoading(true);
+      const createdUser = await apiClient.createUser(newUsername, newPassword, newRole);
+
+      setUserSuccess(`✓ User "${createdUser.username}" created as ${createdUser.role}!`);
+      setNewUsername('');
+      setNewPassword('');
+      setNewRole('cashier');
+
+      // Clear success after 4 seconds
+      setTimeout(() => setUserSuccess(''), 4000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to create user';
+      setError(msg);
+      console.error('Create user error:', err);
+    } finally {
+      setUserLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600 rounded-lg text-white">
+          <div className="p-2 bg-emerald-700 rounded-lg text-white">
             <BarChart className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Admin Dashboard</h1>
-            <p className="text-xs text-slate-500">Welcome back, {user.name}</p>
+            <h1 className="text-xl font-bold text-slate-800">Sabic Admin Dashboard</h1>
+            <p className="text-xs text-slate-500">
+              Sabic International General Trading &amp; Contracting Co. W.L.L
+            </p>
           </div>
         </div>
 
@@ -207,7 +248,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               activeTab === 'overview'
-                ? 'bg-white shadow text-blue-700'
+                ? 'bg-white shadow text-emerald-700'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -217,17 +258,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             onClick={() => setActiveTab('inventory')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               activeTab === 'inventory'
-                ? 'bg-white shadow text-blue-700'
+                ? 'bg-white shadow text-emerald-700'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             Inventory
           </button>
           <button
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'users'
+                ? 'bg-white shadow text-emerald-700'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            Users
+          </button>
+          <button
             onClick={() => setActiveTab('audit')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               activeTab === 'audit'
-                ? 'bg-white shadow text-blue-700'
+                ? 'bg-white shadow text-emerald-700'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -250,6 +301,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         <div className="bg-red-50 border-b border-red-200 px-8 py-3 flex justify-between items-center">
           <p className="text-sm text-red-700">{error}</p>
           <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Success Banner */}
+      {userSuccess && (
+        <div className="bg-green-50 border-b border-green-200 px-8 py-3 flex justify-between items-center">
+          <p className="text-sm text-green-700 font-medium">{userSuccess}</p>
+          <button onClick={() => setUserSuccess('')} className="text-green-600 hover:text-green-800">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -290,7 +351,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <TrendingUp className="w-6 h-6" />
                       </div>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Total Revenue</h3>
+                    <h3 className="text-slate-500 text-sm font-medium">Sabic Daily Revenue</h3>
                     <p className="text-3xl font-bold text-slate-800 mt-1">
                       {format3(report.total_revenue)}{' '}
                       <span className="text-sm font-normal text-slate-400">KWD</span>
@@ -303,7 +364,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <ShoppingBag className="w-6 h-6" />
                       </div>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Total Sales Count</h3>
+                    <h3 className="text-slate-500 text-sm font-medium">Sabic Sales Count</h3>
                     <p className="text-3xl font-bold text-slate-800 mt-1">
                       {report.total_sales_count}
                     </p>
@@ -315,7 +376,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <CreditCard className="w-6 h-6" />
                       </div>
                     </div>
-                    <h3 className="text-slate-500 text-sm font-medium">Avg. Ticket Size</h3>
+                    <h3 className="text-slate-500 text-sm font-medium">Avg. Ticket (Sabic)</h3>
                     <p className="text-3xl font-bold text-slate-800 mt-1">
                       {report.total_sales_count
                         ? format3(Number(report.total_revenue || 0) / report.total_sales_count)
@@ -329,7 +390,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   {/* Payment Methods */}
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">
-                      Revenue by Payment Method
+                      Sabic Revenue by Payment Method
                     </h3>
                     <div className="space-y-4">
                       {report.sales_by_payment.map((item, idx) => {
@@ -346,7 +407,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2.5">
                               <div
-                                className="bg-blue-600 h-2.5 rounded-full"
+                                className="bg-emerald-600 h-2.5 rounded-full"
                                 style={{ width: `${percentage}%` }}
                               ></div>
                             </div>
@@ -395,11 +456,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600" /> Item Management
+                <Package className="w-5 h-5 text-emerald-600" /> Item Management
               </h2>
               <button
                 onClick={() => setShowAddItemModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 shadow-sm transition-colors text-sm font-medium"
               >
                 <Plus className="w-4 h-4" /> Add Item
               </button>
@@ -451,7 +512,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                               setNewPrice(String(item.price_per_unit ?? ''));
                             }}
                             disabled={itemLoading}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline disabled:opacity-50"
+                            className="text-emerald-600 hover:text-emerald-800 text-sm font-medium underline disabled:opacity-50"
                           >
                             Edit Price
                           </button>
@@ -473,6 +534,77 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 </table>
               </div>
             )}
+          </div>
+        ) : activeTab === 'users' ? (
+          /* USERS TAB */
+          <div className="grid grid-cols-1 max-w-md mx-auto">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-6">
+                <UsersIcon className="w-5 h-5 text-emerald-600" /> Create New User
+              </h2>
+
+              <form onSubmit={handleCreateUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    value={newUsername}
+                    onChange={e => setNewUsername(e.target.value)}
+                    placeholder="e.g., cashier1"
+                    required
+                    disabled={userLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="Enter secure password"
+                    required
+                    disabled={userLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    value={newRole}
+                    onChange={e => setNewRole(e.target.value as 'cashier' | 'admin')}
+                    disabled={userLoading}
+                  >
+                    <option value="cashier">Cashier</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={userLoading}
+                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2.5 rounded-lg disabled:opacity-60 transition-colors"
+                >
+                  {userLoading ? 'Creating User...' : 'Create User'}
+                </button>
+              </form>
+
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs text-blue-700">
+                  <strong>ℹ️ Tip:</strong> Create cashier accounts for POS operators. Each user gets
+                  their own login credentials.
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
           /* AUDIT LOG TAB */
@@ -557,7 +689,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <button
                 onClick={handleUpdatePrice}
                 disabled={itemLoading}
-                className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="flex-1 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
               >
                 {itemLoading ? 'Saving...' : 'Save'}
               </button>
@@ -646,7 +778,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <button
                 onClick={handleAddItem}
                 disabled={itemLoading}
-                className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="flex-1 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
               >
                 {itemLoading ? 'Creating...' : 'Create Item'}
               </button>

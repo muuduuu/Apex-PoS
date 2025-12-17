@@ -71,6 +71,19 @@ class APIClient {
     }
   }
 
+  async createUser(username: string, password: string, role: 'admin' | 'cashier'): Promise<User> {
+  const response = await fetch(`${API_BASE}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ username, password, role }),
+  });
+
+  return handleResponse<User>(response);
+}
+
   /**
    * Logout - clears backend session
    */
@@ -86,6 +99,8 @@ class APIClient {
     }
   }
 
+
+  
   // ==================== ITEMS ====================
 
   /**
