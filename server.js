@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import bcryptjs from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { query } from './lib/db.js';
 
 console.log('DB INFO:', {
@@ -11,9 +12,12 @@ console.log('DB INFO:', {
   DB_NAME: process.env.DB_NAME,
 });
 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ✅ JWT CONFIG
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-12345';
+const JWT_EXPIRES_IN = '7d';
 
 // Middleware
 app.use(cors({
@@ -38,36 +42,63 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// ==================== JWT MIDDLEWARE ====================
+// ✅ NEW: Verify JWT token from Authorization header
+const authenticateJWT = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return res.status(401).json({ error: 'Access token required' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userResult = await query('SELECT id, username, role, name FROM users WHERE id = $1', [decoded.userId]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    req.user = userResult.rows[0];
+    next();
+  } catch (error) {
+    console.error('JWT verification error:', error.message);
+    res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
+
 // ==================== AUTHENTICATION ====================
 
+// POST /api/auth/login - ✅ UPDATED: Return JWT token
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    console.log('LOGIN ATTEMPT:', { username, password });
+    console.log('LOGIN ATTEMPT:', { username });
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password required' });
     }
     
-    // Query database for user
     const result = await query('SELECT * FROM users WHERE username = $1', [username]);
-    console.log('DB USER ROWS:', result.rows);
-
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const user = result.rows[0];
-
-    // Compare password with hash
     const passwordMatch = await bcryptjs.compare(password, user.password_hash);
-    console.log('PASSWORD MATCH?', passwordMatch);
-
 
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    // ✅ NEW: Generate JWT token
+    const token = jwt.sign(
+      { userId: user.id }, 
+      JWT_SECRET, 
+      { expiresIn: JWT_EXPIRES_IN }
+    );
 
     // Log the login
     await query(
@@ -75,44 +106,41 @@ app.post('/api/auth/login', async (req, res) => {
       [user.id, 'LOGIN', `User ${username} logged in`]
     );
 
-
-    // Return user (without password)
     const { password_hash, ...userWithoutPassword } = user;
-    res.json({ user: userWithoutPassword });
+    res.json({ 
+      user: userWithoutPassword,
+      token  // ✅ NEW: Frontend stores this in localStorage
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
   }
 });
 
-app.get('/api/auth/me', async (req, res) => {
-  try {
-    // For now, check recent login via session or simple cookie check
-    // TODO: Proper session store (Redis) or JWT in future
-    
-    // Simulate session check - replace with your actual session logic
-    const result = await query('SELECT id, username, role, name FROM users WHERE id = 1'); // Temp hardcoded
-    
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const user = result.rows[0];
-    res.json({ user });
-  } catch (error) {
-    console.error('Auth me error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
+// GET /api/auth/me - ✅ UPDATED: Protected, verify JWT
+app.get('/api/auth/me', authenticateJWT, (req, res) => {
+  res.json({ user: req.user });
 });
-// ✅ CORRECTED /api/users endpoint - REPLACE your broken version
-app.post('/api/users', async (req, res) => {
+
+// POST /api/auth/logout - ✅ NEW: Just for consistency
+app.post('/api/auth/logout', (req, res) => {
+  res.json({ message: 'Logged out successfully' });
+});
+
+// ==================== USERS (Admin only) ====================
+
+// POST /api/users - ✅ UPDATED: Protected, admin-only
+app.post('/api/users', authenticateJWT, async (req, res) => {
   try {
-    // 1. TEMP: Allow any logged-in user (FIX auth later)
+    const currentUser = req.user;
+    if (currentUser.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
     console.log('Creating user request:', req.body);
 
     const { username, password, role } = req.body;
 
-    // 2. Validation
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password required' });
     }
@@ -126,19 +154,17 @@ app.post('/api/users', async (req, res) => {
       return res.status(400).json({ error: 'Role must be "admin" or "cashier"' });
     }
 
-    // 3. Check if username exists
     const existingUser = await query('SELECT id FROM users WHERE username = $1', [username]);
     if (existingUser.rows.length > 0) {
       return res.status(409).json({ error: 'Username already exists' });
     }
 
-    // 4. Hash password + create user (using query & bcryptjs)
     const hashedPassword = await bcryptjs.hash(password, 10);
     const newUser = await query(
-      `INSERT INTO users (username, password_hash, role, created_at) 
-       VALUES ($1, $2, $3, NOW()) 
-       RETURNING id, username, role`,
-      [username, hashedPassword, role]
+      `INSERT INTO users (username, password_hash, role, name, created_at) 
+       VALUES ($1, $2, $3, $4, NOW()) 
+       RETURNING id, username, role, name`,
+      [username, hashedPassword, role, username]
     );
 
     console.log(`✅ User created: ${username} (${role}) ID: ${newUser.rows[0].id}`);
@@ -149,7 +175,11 @@ app.post('/api/users', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-app.post('/api/items', async (req, res) => {
+
+// ==================== ITEMS ====================
+
+// POST /api/items - ✅ UPDATED: Protected
+app.post('/api/items', authenticateJWT, async (req, res) => {
   try {
     const { name_en, name_ar, price_per_unit } = req.body;
 
@@ -163,8 +193,8 @@ app.post('/api/items', async (req, res) => {
     );
 
     await query(
-      'INSERT INTO audit_logs (action, details) VALUES ($1, $2)',
-      ['CREATE_ITEM', `Created item: ${name_en}`]
+      'INSERT INTO audit_logs (user_id, action, details) VALUES ($1, $2, $3)',
+      [req.user.id, 'CREATE_ITEM', `Created item: ${name_en}`]
     );
 
     res.status(201).json(result.rows[0]);
@@ -174,7 +204,19 @@ app.post('/api/items', async (req, res) => {
   }
 });
 
-app.patch('/api/items/:id/price', async (req, res) => {
+// GET /api/items - ✅ UPDATED: Protected
+app.get('/api/items', authenticateJWT, async (req, res) => {
+  try {
+    const result = await query('SELECT * FROM items WHERE active = true ORDER BY name_en');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching items:', error);
+    res.status(500).json({ error: 'Failed to fetch items' });
+  }
+});
+
+// PATCH /api/items/:id/price - ✅ UPDATED: Protected
+app.patch('/api/items/:id/price', authenticateJWT, async (req, res) => {
   try {
     const { price_per_unit } = req.body;
     const result = await query(
@@ -193,7 +235,8 @@ app.patch('/api/items/:id/price', async (req, res) => {
   }
 });
 
-app.delete('/api/items/:id', async (req, res) => {
+// DELETE /api/items/:id - ✅ UPDATED: Protected
+app.delete('/api/items/:id', authenticateJWT, async (req, res) => {
   try {
     const result = await query('DELETE FROM items WHERE id = $1 RETURNING *', [req.params.id]);
     if (result.rows.length === 0) {
@@ -206,7 +249,8 @@ app.delete('/api/items/:id', async (req, res) => {
   }
 });
 
-app.patch('/api/items/:id/status', async (req, res) => {
+// PATCH /api/items/:id/status - ✅ UPDATED: Protected
+app.patch('/api/items/:id/status', authenticateJWT, async (req, res) => {
   try {
     await query('UPDATE items SET active = NOT active WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -218,7 +262,8 @@ app.patch('/api/items/:id/status', async (req, res) => {
 
 // ==================== SALES ====================
 
-app.post('/api/sales', async (req, res) => {
+// POST /api/sales - ✅ UPDATED: Protected, use req.user.id
+app.post('/api/sales', authenticateJWT, async (req, res) => {
   try {
     const {
       items: saleItems,
@@ -232,24 +277,22 @@ app.post('/api/sales', async (req, res) => {
       notes,
     } = req.body;
 
-    // Generate sale number
     const saleNumberResult = await query(
       "SELECT LPAD((COALESCE(MAX(CAST(SUBSTRING(sale_number FROM 11) AS INTEGER)), 0) + 1)::text, 6, '0') as next_num FROM sales WHERE sale_number LIKE 'SALE-2025-%'"
     );
     const nextNum = saleNumberResult.rows[0].next_num;
     const sale_number = `SALE-2025-${nextNum}`;
 
-    // Insert sale
+    // ✅ UPDATED: Use req.user.id instead of hardcoded 1
     const saleResult = await query(
       `INSERT INTO sales (sale_number, user_id, subtotal, discount_amount, discount_percentage, total_amount, payment_method, knet_reference, cheque_number, notes, status, sale_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'completed', NOW())
        RETURNING *`,
-      [sale_number, 1, subtotal, discount_amount, discount_percentage, total_amount, payment_method, knet_reference, cheque_number, notes]
+      [sale_number, req.user.id, subtotal, discount_amount, discount_percentage, total_amount, payment_method, knet_reference, cheque_number, notes]
     );
 
     const sale = saleResult.rows[0];
 
-    // Insert sale items
     for (const item of saleItems) {
       await query(
         `INSERT INTO sale_items (sale_id, item_id, item_name_en, item_name_ar, quantity, unit_price, line_total)
@@ -258,7 +301,6 @@ app.post('/api/sales', async (req, res) => {
       );
     }
 
-    // Get sale with items
     const fullSaleResult = await query('SELECT * FROM sales WHERE id = $1', [sale.id]);
     const itemsResult = await query('SELECT * FROM sale_items WHERE sale_id = $1', [sale.id]);
 
@@ -267,10 +309,9 @@ app.post('/api/sales', async (req, res) => {
       items: itemsResult.rows,
     };
 
-    // Log
     await query(
       'INSERT INTO audit_logs (user_id, action, details) VALUES ($1, $2, $3)',
-      [1, 'CREATE_SALE', `Sale ${sale_number} created for ${total_amount} KWD`]
+      [req.user.id, 'CREATE_SALE', `Sale ${sale_number} created for ${total_amount} KWD`]
     );
 
     res.status(201).json(fullSale);
@@ -280,7 +321,8 @@ app.post('/api/sales', async (req, res) => {
   }
 });
 
-app.get('/api/sales', async (req, res) => {
+// GET /api/sales - ✅ UPDATED: Protected
+app.get('/api/sales', authenticateJWT, async (req, res) => {
   try {
     const { date } = req.query;
 
@@ -317,7 +359,8 @@ app.get('/api/sales', async (req, res) => {
   }
 });
 
-app.get('/api/sales/:saleNumber', async (req, res) => {
+// GET /api/sales/:saleNumber - ✅ UPDATED: Protected
+app.get('/api/sales/:saleNumber', authenticateJWT, async (req, res) => {
   try {
     const result = await query('SELECT * FROM sales WHERE sale_number = $1', [req.params.saleNumber]);
     if (result.rows.length === 0) {
@@ -332,36 +375,33 @@ app.get('/api/sales/:saleNumber', async (req, res) => {
 
 // ==================== REFUNDS ====================
 
-app.post('/api/refunds', async (req, res) => {
+// POST /api/refunds - ✅ UPDATED: Protected
+app.post('/api/refunds', authenticateJWT, async (req, res) => {
   try {
     const { sale_id, amount, reason } = req.body;
 
-    // Check if sale exists
     const saleResult = await query('SELECT * FROM sales WHERE id = $1', [sale_id]);
     if (saleResult.rows.length === 0) {
       return res.status(404).json({ error: 'Sale not found' });
     }
 
-    // Generate refund number
     const refundNumberResult = await query(
       "SELECT LPAD((COALESCE(MAX(CAST(SUBSTRING(refund_number FROM 15) AS INTEGER)), 0) + 1)::text, 6, '0') as next_num FROM refunds WHERE refund_number LIKE 'REFUND-2025-%'"
     );
     const nextNum = refundNumberResult.rows[0].next_num;
     const refund_number = `REFUND-2025-${nextNum}`;
 
-    // Insert refund
+    // ✅ UPDATED: Use req.user.id
     const refundResult = await query(
       'INSERT INTO refunds (refund_number, sale_id, amount, reason, created_by_user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [refund_number, sale_id, amount, reason, 1]
+      [refund_number, sale_id, amount, reason, req.user.id]
     );
 
-    // Update sale status
     await query('UPDATE sales SET status = $1 WHERE id = $2', ['refunded', sale_id]);
 
-    // Log
     await query(
       'INSERT INTO audit_logs (user_id, action, details) VALUES ($1, $2, $3)',
-      [1, 'CREATE_REFUND', `Refund ${refund_number} created for ${amount} KWD`]
+      [req.user.id, 'CREATE_REFUND', `Refund ${refund_number} created for ${amount} KWD`]
     );
 
     res.status(201).json(refundResult.rows[0]);
@@ -371,7 +411,8 @@ app.post('/api/refunds', async (req, res) => {
   }
 });
 
-app.get('/api/refunds', async (req, res) => {
+// GET /api/refunds - ✅ UPDATED: Protected
+app.get('/api/refunds', authenticateJWT, async (req, res) => {
   try {
     const result = await query('SELECT * FROM refunds ORDER BY created_at DESC');
     res.json(result.rows);
@@ -381,7 +422,8 @@ app.get('/api/refunds', async (req, res) => {
   }
 });
 
-app.get('/api/refunds/:refundNumber', async (req, res) => {
+// GET /api/refunds/:refundNumber - ✅ UPDATED: Protected
+app.get('/api/refunds/:refundNumber', authenticateJWT, async (req, res) => {
   try {
     const result = await query('SELECT * FROM refunds WHERE refund_number = $1', [req.params.refundNumber]);
     if (result.rows.length === 0) {
@@ -396,12 +438,12 @@ app.get('/api/refunds/:refundNumber', async (req, res) => {
 
 // ==================== REPORTS ====================
 
-app.get('/api/reports/daily', async (req, res) => {
+// GET /api/reports/daily - ✅ UPDATED: Protected
+app.get('/api/reports/daily', authenticateJWT, async (req, res) => {
   try {
     const { date } = req.query;
     const dateFilter = date || new Date().toISOString().split('T')[0];
 
-    // Get sales for date
     const salesResult = await query(
       'SELECT * FROM sales WHERE DATE(sale_date) = $1',
       [dateFilter]
@@ -410,7 +452,6 @@ app.get('/api/reports/daily', async (req, res) => {
     const total_revenue = salesResult.rows.reduce((sum, s) => sum + s.total_amount, 0);
     const total_sales_count = salesResult.rows.length;
 
-    // Sales by payment method
     const paymentResult = await query(
       `SELECT payment_method, SUM(total_amount) as total
        FROM sales WHERE DATE(sale_date) = $1
@@ -425,7 +466,6 @@ app.get('/api/reports/daily', async (req, res) => {
       { name: 'Credit', value: paymentResult.rows.find(r => r.payment_method === 'credit')?.total || 0 },
     ];
 
-    // Top items
     const topItemsResult = await query(
       `SELECT item_name_en, SUM(quantity) as total
        FROM sale_items si
@@ -452,7 +492,8 @@ app.get('/api/reports/daily', async (req, res) => {
   }
 });
 
-app.get('/api/reports/sales-csv', async (req, res) => {
+// GET /api/reports/sales-csv - ✅ UPDATED: Protected
+app.get('/api/reports/sales-csv', authenticateJWT, async (req, res) => {
   try {
     const { date } = req.query;
 
@@ -500,8 +541,13 @@ app.get('/api/reports/sales-csv', async (req, res) => {
 
 // ==================== AUDIT LOGS ====================
 
-app.get('/api/audit-logs', async (req, res) => {
+// GET /api/audit-logs - ✅ UPDATED: Protected, admin only
+app.get('/api/audit-logs', authenticateJWT, async (req, res) => {
   try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
     const { limit = 100, action } = req.query;
 
     let sql = 'SELECT * FROM audit_logs';
@@ -538,10 +584,11 @@ app.get('/health', async (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n${'='.repeat(50)}`);
-  console.log('  Kuwait POS Backend API');
+  console.log('  Kuwait POS Backend API (JWT)');
   console.log(`${'='.repeat(50)}`);
   console.log(`\n✅ Server running on http://localhost:${PORT}`);
   console.log(`\n📍 API Base: http://localhost:${PORT}/api`);
+  console.log(`\n🔐 JWT Auth Enabled`);
   console.log(`\n🧪 Test credentials:`);
   console.log(`   admin / admin123`);
   console.log(`   cashier1 / cashier123\n`);
