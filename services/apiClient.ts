@@ -51,7 +51,7 @@ class APIClient {
 
   async login(username: string, password: string): Promise<{ user: User; token: string } | null> {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/login`, {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -73,7 +73,7 @@ class APIClient {
 
   async logout(): Promise<void> {
     try {
-      await fetch(`${API_BASE}/api/auth/logout`, {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
         headers: getAuthHeaders(),
       });
@@ -85,7 +85,7 @@ class APIClient {
 
   async checkSession(): Promise<User | null> {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/me`, {
+      const response = await fetch(`${API_BASE}/auth/me`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -99,7 +99,7 @@ class APIClient {
   }
 
   async createUser(username: string, password: string, role: 'admin' | 'cashier'): Promise<User> {
-    const response = await fetch(`${API_BASE}/api/users`, {
+    const response = await fetch(`${API_BASE}/users`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ username, password, role }),
@@ -110,21 +110,21 @@ class APIClient {
   // ==================== ITEMS ====================
 
   async getItems(): Promise<Item[]> {
-    const response = await fetch(`${API_BASE}/api/items`, {
+    const response = await fetch(`${API_BASE}/items`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<Item[]>(response);
   }
 
   async getItem(itemId: number): Promise<Item> {
-    const response = await fetch(`${API_BASE}/api/items/${itemId}`, {
+    const response = await fetch(`${API_BASE}/items/${itemId}`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<Item>(response);
   }
 
   async addItem(itemData: { name_en: string; name_ar: string; price_per_unit: number }): Promise<Item> {
-    const response = await fetch(`${API_BASE}/api/items`, {
+    const response = await fetch(`${API_BASE}/items`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(itemData),
@@ -137,7 +137,7 @@ class APIClient {
   }
 
   async updateItemPrice(id: number, newPrice: number): Promise<Item> {
-    const response = await fetch(`${API_BASE}/api/items/${id}/price`, {
+    const response = await fetch(`${API_BASE}/items/${id}/price`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify({ price_per_unit: newPrice }),
@@ -146,7 +146,7 @@ class APIClient {
   }
 
   async deleteItem(id: number): Promise<{ success: boolean }> {
-    const response = await fetch(`${API_BASE}/api/items/${id}`, {
+    const response = await fetch(`${API_BASE}/items/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
@@ -154,7 +154,7 @@ class APIClient {
   }
 
   async toggleItemStatus(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE}/api/items/${id}/status`, {
+    const response = await fetch(`${API_BASE}/items/${id}/status`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
     });
@@ -181,7 +181,7 @@ class APIClient {
       throw new Error('Cheque number is required for cheque payments');
     }
 
-    const response = await fetch(`${API_BASE}/api/sales`, {
+    const response = await fetch(`${API_BASE}/sales`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(saleData),
@@ -190,7 +190,7 @@ class APIClient {
   }
 
   async getSales(date?: string): Promise<Sale[]> {
-    const url = new URL(`${API_BASE}/api/sales`);
+    const url = new URL(`${API_BASE}/sales`);
     if (date) url.searchParams.append('date', date);
 
     const response = await fetch(url.toString(), {
@@ -205,7 +205,7 @@ class APIClient {
 
   async getSaleByNumber(saleNumber: string): Promise<Sale | undefined> {
     try {
-      const response = await fetch(`${API_BASE}/api/sales/${encodeURIComponent(saleNumber)}`, {
+      const response = await fetch(`${API_BASE}/sales/${encodeURIComponent(saleNumber)}`, {
         headers: getAuthHeaders(),
       });
       if (response.status === 404) return undefined;
@@ -226,7 +226,7 @@ class APIClient {
     if (!reason?.trim()) throw new Error('Refund reason is required');
     if (amount <= 0) throw new Error('Refund amount must be greater than 0');
 
-    const response = await fetch(`${API_BASE}/api/refunds`, {
+    const response = await fetch(`${API_BASE}/refunds`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ sale_id: saleId, amount, reason: reason.trim() }),
@@ -235,14 +235,14 @@ class APIClient {
   }
 
   async getRefunds(): Promise<Refund[]> {
-    const response = await fetch(`${API_BASE}/api/refunds`, {
+    const response = await fetch(`${API_BASE}/refunds`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<Refund[]>(response);
   }
 
   async getRefund(refundNumber: string): Promise<Refund> {
-    const response = await fetch(`${API_BASE}/api/refunds/${encodeURIComponent(refundNumber)}`, {
+    const response = await fetch(`${API_BASE}/refunds/${encodeURIComponent(refundNumber)}`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<Refund>(response);
@@ -252,7 +252,7 @@ class APIClient {
 
   async getDailyReport(dateStr: string): Promise<DailyReport> {
     const response = await fetch(
-      `${API_BASE}/api/reports/daily?date=${encodeURIComponent(dateStr)}`,
+      `${API_BASE}/reports/daily?date=${encodeURIComponent(dateStr)}`,
       { headers: getAuthHeaders() }
     );
     return handleResponse<DailyReport>(response);
@@ -260,7 +260,7 @@ class APIClient {
 
   async exportSalesCSV(dateStr: string): Promise<Blob> {
     const response = await fetch(
-      `${API_BASE}/api/reports/sales-csv?date=${encodeURIComponent(dateStr)}`,
+      `${API_BASE}/reports/sales-csv?date=${encodeURIComponent(dateStr)}`,
       { headers: getAuthHeaders() }
     );
     if (!response.ok) throw new APIError(response.status, 'Failed to export sales data');
@@ -270,14 +270,14 @@ class APIClient {
   // ==================== AUDIT LOGS ====================
 
   async getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
-    const url = new URL(`${API_BASE}/api/audit-logs`);
+    const url = new URL(`${API_BASE}/audit-logs`);
     url.searchParams.append('limit', limit.toString());
     const response = await fetch(url.toString(), { headers: getAuthHeaders() });
     return handleResponse<AuditLog[]>(response);
   }
 
   async getAuditLogsByAction(action: string): Promise<AuditLog[]> {
-    const url = new URL(`${API_BASE}/api/audit-logs`);
+    const url = new URL(`${API_BASE}/audit-logs`);
     url.searchParams.append('action', action);
     const response = await fetch(url.toString(), { headers: getAuthHeaders() });
     return handleResponse<AuditLog[]>(response);

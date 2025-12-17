@@ -34,7 +34,8 @@ app.use(cors({
     'http://192.168.1.3:5173',
     'http://192.168.1.3:5174',
     'http://192.168.1.3:3001',
-    'https://pos-apex.vercel.app'
+    'https://pos-apex.vercel.app',
+    'https://apex-pos-production.up.railway.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
