@@ -20,11 +20,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const user = await apiClient.login(username, password);
+      // ✅ apiClient.login() now returns { user, token }
+      const result = await apiClient.login(username, password);
       
-      if (user) {
-        // Login successful
-        onLogin(user);
+      if (result) {
+        // ✅ Token already stored in localStorage by apiClient.login()
+        // Just pass the user to onLogin
+        onLogin(result.user);
       } else {
         // Invalid credentials (401)
         setError('Invalid username or password');
@@ -42,20 +44,29 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+
         <div className="bg-white pt-8 px-8 py-8 pb-0 text-center">
           <img src={LogoImage} alt="Logo" className="mx-auto mb-4 h-20" />
+
         </div>
-        <div className="bg-slate-50 text-center">
-        <p className="text-black font-semibold text-lg">System Login</p>
+
+        {/* Title */}
+        <div className="bg-slate-50 text-center py-4">
+          <p className="text-black font-semibold text-lg">System Login</p>
         </div>
+
+        {/* Form */}
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
             {error && (
-              <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+              <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
                 {error}
               </div>
             )}
             
+            {/* Username Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Username</label>
               <div className="relative">
@@ -67,7 +78,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579d] focus:border-[#5a70b5] outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579d] focus:border-[#3d579d] outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter username"
                   required
                   autoComplete="username"
@@ -75,6 +86,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               </div>
             </div>
 
+            {/* Password Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Password</label>
               <div className="relative">
@@ -86,7 +98,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#5a70b5] focus:border-[#3d579d] outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579d] focus:border-[#3d579d] outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter password"
                   required
                   autoComplete="current-password"
@@ -94,24 +106,34 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || !username || !password}
               className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all ${
                 loading 
-                  ? 'bg-[#5a70b5] cursor-wait' 
-                  : 'bg-[#3d579d] hover:bg-[#2f4377] hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-[#3d579d] disabled:opacity-50 disabled:cursor-not-allowed'
+                  ? 'bg-slate-400 cursor-wait' 
+                  : !username || !password
+                  ? 'bg-slate-300 cursor-not-allowed'
+                  : 'bg-[#3d579d] hover:bg-[#2f4377] hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-[#3d579d]'
               }`}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin">⏳</span> Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-slate-400">
-            <p className="font-medium mb-2">Demo Credentials:</p>
-            <div className="space-y-1">
-              <p><span className="text-slate-600">Admin:</span> admin / admin123</p>
-              <p><span className="text-slate-600">Cashier:</span> cashier1 / cashier123</p>
+          {/* Demo Credentials */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-xs font-semibold text-slate-700 mb-2">📋 Demo Credentials:</p>
+            <div className="space-y-1 text-xs">
+              <p><span className="font-medium text-slate-600">Admin:</span> <code className="bg-white px-2 py-1 rounded">admin</code> / <code className="bg-white px-2 py-1 rounded">admin123</code></p>
+              <p><span className="font-medium text-slate-600">Cashier:</span> <code className="bg-white px-2 py-1 rounded">cashier1</code> / <code className="bg-white px-2 py-1 rounded">cashier123</code></p>
             </div>
           </div>
         </div>

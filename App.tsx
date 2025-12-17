@@ -8,26 +8,15 @@ import { apiClient } from './services/apiClient';
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
 
-  // ✅ PERSISTENT SESSION CHECK - Runs on EVERY page load
+  // ✅ Check JWT session on app load
   useEffect(() => {
-    const checkSession = async () => {
+    const checkAuth = async () => {
       try {
         setLoading(true);
-        
-        // 1. Try to get current user from backend session
-        // Backend checks cookie → returns user if valid
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/me`, {
-          credentials: 'include', // Sends session cookie
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
+        // Use apiClient.checkSession() which includes JWT token in headers
+        const user = await apiClient.checkSession();
+        setUser(user);
       } catch (err) {
         console.error('Session check failed:', err);
         setUser(null);
@@ -36,17 +25,19 @@ const App: React.FC = () => {
       }
     };
 
-    checkSession();
+    checkAuth();
   }, []);
 
+  // ✅ Handle login - receives { user, token } from LoginPage
   const handleLogin = (loggedInUser: User) => {
     setUser(loggedInUser);
-    setError('');
+    // Token already stored in localStorage by apiClient.login()
   };
 
+  // ✅ Handle logout - clears token
   const handleLogout = async () => {
     try {
-      await apiClient.logout(); // Clears backend session
+      await apiClient.logout();
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
@@ -54,6 +45,7 @@ const App: React.FC = () => {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100">
@@ -65,21 +57,22 @@ const App: React.FC = () => {
     );
   }
 
-  // Show login if no user
+  // Not logged in - show login
   if (!user) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  // Role-based routing
+  // Admin - show dashboard
   if (user.role === 'admin') {
     return <Dashboard user={user} onLogout={handleLogout} />;
   }
 
+  // Cashier - show POS
   if (user.role === 'cashier') {
     return <SalesPage user={user} onLogout={handleLogout} />;
   }
 
-  // Unknown role
+  // Unknown role - error
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="bg-white p-8 rounded-xl shadow-lg max-w-md text-center">
@@ -95,6 +88,5 @@ const App: React.FC = () => {
     </div>
   );
 };
-
 
 export default App;
