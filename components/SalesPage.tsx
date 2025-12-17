@@ -4,12 +4,10 @@ import { Item, SaleItem, PaymentMethod, User, Sale, Refund } from '../types';
 import { ReceiptModal } from './ReceiptModal';
 import { ShoppingCart, Trash2, Plus, CreditCard, Banknote, FileText, Eraser, RotateCcw, XCircle, Search, AlertCircle, Eye } from 'lucide-react';
 
-
 interface SalesPageProps {
   user: User;
   onLogout: () => void;
 }
-
 
 export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const [items, setItems] = useState<Item[]>([]);
@@ -17,12 +15,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const [error, setError] = useState<string>('');
   const [recentSales, setRecentSales] = useState<Sale[]>([]);
 
-
   // Cart State
   const [cart, setCart] = useState<SaleItem[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [qtyInput, setQtyInput] = useState<string>('1');
-
 
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -31,12 +27,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const [discountType, setDiscountType] = useState<'amount' | 'percent'>('amount');
   const [discountValue, setDiscountValue] = useState<string>('0');
 
-
   // Sale Completion State
   const [processing, setProcessing] = useState(false);
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const [completedRefund, setCompletedRefund] = useState<Refund | null>(null);
-
 
   // Refund State
   const [showRefundModal, setShowRefundModal] = useState(false);
@@ -49,7 +43,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   // Sales History State
   const [showSalesHistory, setShowSalesHistory] = useState(false);
 
-
   // Fetch items on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -58,7 +51,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         setError('');
         const itemsData = await db.getItems();
         setItems(itemsData.filter(i => i.active !== false));
-        
+
         // Fetch recent sales
         const salesData = await db.getSales();
         setRecentSales(salesData.slice(-10).reverse());
@@ -73,18 +66,14 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     fetchData();
   }, []);
 
-
   const handleAddItem = () => {
     if (!selectedItemId) return;
-
 
     const item = items.find(i => i.id === parseInt(selectedItemId));
     const qty = parseFloat(qtyInput);
 
-
     if (item && qty > 0) {
       const existingItemIndex = cart.findIndex(i => i.item_id === item.id);
-
 
       if (existingItemIndex >= 0) {
         // Update existing
@@ -102,8 +91,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             item_name_en: item.name_en,
             item_name_ar: item.name_ar,
             quantity: qty,
-            unit_price: item.price_per_unit,
-            line_total: qty * item.price_per_unit,
+            unit_price: Number(item.price_per_unit),
+            line_total: qty * Number(item.price_per_unit),
           },
         ]);
       }
@@ -113,13 +102,11 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     }
   };
 
-
   const handleQuickSelect = (item: Item) => {
     setSelectedItemId(item.id.toString());
     const qtyInputEl = document.getElementById('qtyInput');
     if (qtyInputEl) qtyInputEl.focus();
   };
-
 
   const updateCartItemQty = (index: number, newQty: number) => {
     if (newQty < 0) return;
@@ -129,13 +116,11 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     setCart(newCart);
   };
 
-
   const removeFromCart = (index: number) => {
     const newCart = [...cart];
     newCart.splice(index, 1);
     setCart(newCart);
   };
-
 
   const clearCart = () => {
     if (window.confirm('Are you sure you want to clear the cart?')) {
@@ -148,10 +133,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     }
   };
 
-
   // Calculations
   const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.line_total, 0), [cart]);
-
 
   const discountCalc = useMemo(() => {
     const val = parseFloat(discountValue) || 0;
@@ -163,9 +146,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     }
   }, [subtotal, discountValue, discountType]);
 
-
   const totalAmount = Math.max(0, subtotal - discountCalc.amount);
-
 
   // Validation
   const isKnetInvalid = paymentMethod === 'knet' && !knetRef.trim();
@@ -174,14 +155,11 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const isCartEmpty = cart.length === 0;
   const canSubmit = !isCartEmpty && !isKnetInvalid && !isChequeInvalid && isPaymentSelected && !processing;
 
-
   const handleSubmit = async () => {
     if (!canSubmit) return;
 
-
     setProcessing(true);
     setError('');
-
 
     try {
       const sale = await db.createSale({
@@ -196,12 +174,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         notes: '',
       });
 
-
       setCompletedSale(sale);
-      
+
       // Add to recent sales
       setRecentSales([sale, ...recentSales].slice(0, 10));
-
 
       // Reset form
       setCart([]);
@@ -221,15 +197,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     }
   };
 
-
   // Refund Handlers
   const handleSearchSaleForRefund = async () => {
     if (!refundSaleIdInput.trim()) return;
 
-
     setRefundSearching(true);
     setRefundError('');
-
 
     try {
       const sale = await db.getSaleByNumber(refundSaleIdInput.trim());
@@ -248,26 +221,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     }
   };
 
-
   const handleProcessRefund = async () => {
     if (!refundSaleData || !refundReason.trim()) return;
 
-
-    const confirmMsg = `Process full refund of ${refundSaleData.total_amount.toFixed(3)} KWD for Sale ${refundSaleData.sale_number}?`;
+    const confirmMsg = `Process full refund of ${Number(refundSaleData.total_amount).toFixed(3)} KWD for Sale ${refundSaleData.sale_number}?`;
     if (!confirm(confirmMsg)) return;
-
 
     setProcessing(true);
     setRefundError('');
 
-
     try {
       const refund = await db.createRefund(
         refundSaleData.id,
-        refundSaleData.total_amount,
+        Number(refundSaleData.total_amount),
         refundReason.trim()
       );
-
 
       setCompletedRefund(refund);
       setShowRefundModal(false);
@@ -284,7 +252,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     }
   };
 
-
   const closeRefundModal = () => {
     setShowRefundModal(false);
     setRefundSaleData(null);
@@ -292,7 +259,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
     setRefundReason('');
     setRefundError('');
   };
-
 
   if (loading) {
     return (
@@ -304,7 +270,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
       </div>
     );
   }
-
 
   return (
     <div className="flex flex-col lg:h-screen bg-slate-100 min-h-screen">
@@ -341,7 +306,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         </div>
       </header>
 
-
       {/* Error Banner */}
       {error && (
         <div className="bg-red-50 border-b border-red-200 px-6 py-3 flex items-center gap-3">
@@ -355,7 +319,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           </button>
         </div>
       )}
-
 
       {/* Content Area */}
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
@@ -395,7 +358,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                         selectedItemId === item.id.toString() ? 'text-white' : 'text-blue-600'
                       }`}
                     >
-                      {item.price_per_unit.toFixed(3)} KWD
+                      {Number(item.price_per_unit).toFixed(3)} KWD
                     </div>
                     {selectedItemId === item.id.toString() && (
                       <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
@@ -405,7 +368,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               </div>
             )}
           </div>
-
 
           {/* Add Item Controls */}
           <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 shrink-0">
@@ -422,7 +384,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                   <option value="">-- Select Product --</option>
                   {items.map(item => (
                     <option key={item.id} value={item.id}>
-                      {item.name_en} - {item.price_per_unit.toFixed(3)} KWD
+                      {item.name_en} - {Number(item.price_per_unit).toFixed(3)} KWD
                     </option>
                   ))}
                 </select>
@@ -452,7 +414,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
             </div>
           </div>
 
-
           {/* Shopping Cart Table */}
           <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[300px]">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center shrink-0">
@@ -473,7 +434,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 )}
               </div>
             </div>
-
 
             <div className="flex-1 overflow-auto bg-white">
               {cart.length === 0 ? (
@@ -516,10 +476,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                           />
                         </td>
                         <td className="p-4 text-right text-slate-600 font-mono">
-                          {item.unit_price.toFixed(3)}
+                          {Number(item.unit_price).toFixed(3)}
                         </td>
                         <td className="p-4 text-right font-bold text-slate-800 font-mono">
-                          {item.line_total.toFixed(3)}
+                          {Number(item.line_total).toFixed(3)}
                         </td>
                         <td className="p-4 text-center">
                           <button
@@ -544,7 +504,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           </div>
         </div>
 
-
         {/* Right Column: Payment & Totals */}
         <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col h-auto lg:h-full overflow-y-auto shrink-0 shadow-xl lg:shadow-none z-20">
           <div className="p-6 flex flex-col h-full">
@@ -553,14 +512,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               Payment Details
             </h2>
 
-
             {/* Calculations */}
             <div className="space-y-4 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex justify-between text-slate-600 text-sm">
                 <span>Subtotal</span>
                 <span className="font-mono font-medium">{subtotal.toFixed(3)} KWD</span>
               </div>
-
 
               {/* Discount */}
               <div>
@@ -605,7 +562,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 </div>
               </div>
 
-
               <div className="pt-4 border-t border-slate-200 flex justify-between items-end">
                 <span className="text-lg font-bold text-slate-800">TOTAL DUE</span>
                 <span className="text-3xl font-extrabold text-blue-600 leading-none">
@@ -613,7 +569,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 </span>
               </div>
             </div>
-
 
             {/* Payment Method Selector */}
             <div className="space-y-4 mb-8 flex-1">
@@ -653,7 +608,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 })}
               </div>
 
-
               {/* Dynamic Inputs based on Method */}
               {paymentMethod === 'knet' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm">
@@ -678,7 +632,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 </div>
               )}
 
-
               {paymentMethod === 'cheque' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
                   <label className="block text-xs font-bold text-slate-700 mb-1 uppercase">
@@ -701,7 +654,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 </div>
               )}
             </div>
-
 
             {/* Complete Sale Button */}
             <div className="mt-auto pt-4 border-t border-slate-100">
@@ -729,7 +681,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 )}
               </button>
 
-
               <div className="mt-3 text-center min-h-[1.5rem]">
                 {isCartEmpty && <p className="text-xs text-slate-400">Cart is empty.</p>}
                 {!isCartEmpty && !isPaymentSelected && (
@@ -749,15 +700,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         </div>
       </div>
 
-
       {/* Receipts */}
       {completedSale && <ReceiptModal sale={completedSale} onClose={() => setCompletedSale(null)} />}
-
 
       {completedRefund && (
         <ReceiptModal refund={completedRefund} onClose={() => setCompletedRefund(null)} />
       )}
-
 
       {/* Refund Modal */}
       {showRefundModal && (
@@ -778,14 +726,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               </button>
             </div>
 
-
             {refundError && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center gap-2 text-sm text-red-700">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {refundError}
               </div>
             )}
-
 
             {!refundSaleData ? (
               <div className="space-y-6">
@@ -830,7 +776,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                   <div className="flex justify-between border-b border-slate-200 pb-2">
                     <span className="text-slate-500">Total Amount</span>
                     <span className="font-bold text-slate-800">
-                      {refundSaleData.total_amount.toFixed(3)} KWD
+                      {Number(refundSaleData.total_amount).toFixed(3)} KWD
                     </span>
                   </div>
                   <div>
@@ -840,7 +786,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     </div>
                   </div>
                 </div>
-
 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -859,7 +804,6 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     <option value="Other">Other</option>
                   </select>
                 </div>
-
 
                 <button
                   onClick={handleProcessRefund}
@@ -896,7 +840,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 <XCircle className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="overflow-y-auto flex-1">
               {recentSales.length === 0 ? (
                 <div className="p-8 text-center text-slate-500">
@@ -922,7 +866,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                           {new Date(sale.sale_date).toLocaleString()}
                         </td>
                         <td className="p-3 text-right font-bold text-slate-800">
-                          {sale.total_amount.toFixed(3)} KWD
+                          {Number(sale.total_amount).toFixed(3)} KWD
                         </td>
                         <td className="p-3 capitalize text-slate-600">{sale.payment_method}</td>
                         <td className="p-3">
