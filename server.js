@@ -75,13 +75,33 @@ app.post('/api/auth/login', async (req, res) => {
       [user.id, 'LOGIN', `User ${username} logged in`]
     );
 
-    
+
     // Return user (without password)
     const { password_hash, ...userWithoutPassword } = user;
     res.json({ user: userWithoutPassword });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+app.get('/api/auth/me', async (req, res) => {
+  try {
+    // For now, check recent login via session or simple cookie check
+    // TODO: Proper session store (Redis) or JWT in future
+    
+    // Simulate session check - replace with your actual session logic
+    const result = await query('SELECT id, username, role, name FROM users WHERE id = 1'); // Temp hardcoded
+    
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const user = result.rows[0];
+    res.json({ user });
+  } catch (error) {
+    console.error('Auth me error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 // ✅ CORRECTED /api/users endpoint - REPLACE your broken version
