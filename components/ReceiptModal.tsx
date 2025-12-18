@@ -303,7 +303,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 p-4">
       <div className="bg-white w-96 shadow-xl">
         {/* On‑screen preview (short) */}
         <div className="p-4 font-mono text-sm leading-tight text-black">

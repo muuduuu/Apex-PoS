@@ -808,24 +808,25 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {/* Receipts */}
-      {completedSale && (
-        <ReceiptModal sale={completedSale} onClose={() => setCompletedSale(null)} />
-      )}
-
-      {completedRefund && (
-        <ReceiptModal refund={completedRefund} onClose={() => setCompletedRefund(null)} />
-      )}
-    {selectedHistorySale && (
-        <ReceiptModal
-          sale={selectedHistorySale}
-          onClose={() => setSelectedHistorySale(null)}
-        />
-      )}
+    {completedSale && (
+  <div style={{ zIndex: 60 }}>
+    <ReceiptModal sale={completedSale} onClose={() => setCompletedSale(null)} />
+  </div>
+)}
+{completedRefund && (
+  <div style={{ zIndex: 60 }}>
+    <ReceiptModal refund={completedRefund} onClose={() => setCompletedRefund(null)} />
+  </div>
+)}
+{selectedHistorySale && (
+  <div style={{ zIndex: 60 }}>
+    <ReceiptModal sale={selectedHistorySale} onClose={() => setSelectedHistorySale(null)} />
+  </div>
+)}
 
       {/* Refund Modal */}
       {showRefundModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4 backdrop-blur-sm">
           <div className="bg-white w-full max-w-lg p-6 rounded-2xl shadow-2xl transform transition-all scale-100">
             <div className="flex justify-between items-center mb-6 pb-4 border-b">
               <div className="flex items-center gap-2">
@@ -958,7 +959,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
 
       {/* Sales History Modal */}
       {showSalesHistory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4 backdrop-blur-sm">
           <div className="bg-white w-full max-w-3xl max-h-96 rounded-2xl shadow-2xl transform transition-all flex flex-col overflow-hidden">
             <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
