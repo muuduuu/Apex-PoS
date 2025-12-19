@@ -268,21 +268,21 @@ class APIClient {
   }
   
 async getContractors(): Promise<Contractor[]> {
-  const response = await fetch(`${API_BASE}/api/contractors`, {
+  const response = await fetch(`${API_BASE}/contractors`, {
     headers: getAuthHeaders(),
   });
   return handleResponse<Contractor[]>(response);
 }
 
   async getContractor(id: number): Promise<Contractor> {
-    const response = await fetch(`${API_BASE}/api/contractors/${id}`, {
+    const response = await fetch(`${API_BASE}/contractors/${id}`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<Contractor>(response);
   }
 
   async createContractor(data: Partial<Contractor>): Promise<Contractor> {
-    const response = await fetch(`${API_BASE}/api/contractors`, {
+    const response = await fetch(`${API_BASE}/contractors`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -299,7 +299,7 @@ async createCreditSale(saleData: {
   total_amount: number;
   notes: string;
 }): Promise<Sale> {
-  const response = await fetch(`${API_BASE}/api/credit-sales`, {
+  const response = await fetch(`${API_BASE}/credit-sales`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(saleData),
@@ -308,7 +308,7 @@ async createCreditSale(saleData: {
 }
 
 async processPayment(contractor_id: number, amount: number, payment_method: string, description: string) {
-  const response = await fetch(`${API_BASE}/api/credit-payments`, {
+  const response = await fetch(`${API_BASE}/credit-payments`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ contractor_id, amount, payment_method, description }),
@@ -317,7 +317,7 @@ async processPayment(contractor_id: number, amount: number, payment_method: stri
 }
 
 async getCreditReport(contractorId: number) {
-  const response = await fetch(`${API_BASE}/api/credit-report/${contractorId}`, {
+  const response = await fetch(`${API_BASE}/credit-report/${contractorId}`, {
     headers: getAuthHeaders(),
   });
   return handleResponse(response);
