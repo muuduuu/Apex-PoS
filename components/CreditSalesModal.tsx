@@ -159,7 +159,7 @@ export const CreditSalesModal: React.FC<CreditSalesModalProps> = ({
                   >
                     <div className="font-bold text-slate-800">{contractor.name}</div>
                     <div className="text-xs text-slate-500">
-                      Balance: <span className="font-mono">{contractor.total_credits.toFixed(3)} KWD</span>
+                      Balance: <span className="font-mono">{contractor.(Number(total_credits) || 0).toFixed(3)} KWD</span>
                       {' / Limit: '}
                       <span className="font-mono">{contractor.credit_limit.toFixed(3)} KWD</span>
                     </div>
@@ -263,7 +263,7 @@ export const CreditSalesModal: React.FC<CreditSalesModalProps> = ({
                 <span className="font-bold text-lg text-blue-600">{total.toFixed(3)} KWD</span>
               </div>
               <div className="border-t pt-2 text-xs text-slate-600">
-                <div>Current Balance: <span className="font-mono">{selectedContractor.total_credits.toFixed(3)} KWD</span></div>
+                <div>Current Balance: <span className="font-mono">{selectedContractor.(Number(total_credits) || 0).toFixed(3)} KWD</span></div>
                 <div>After Sale: <span className="font-mono font-bold">{(selectedContractor.total_credits + total).toFixed(3)} KWD</span></div>
               </div>
             </div>

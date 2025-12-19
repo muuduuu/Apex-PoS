@@ -15,7 +15,7 @@ import {
   X,
   Users as UsersIcon,
 } from 'lucide-react';
-import LogoImage from '../src/images/sabic international logo.png';
+import LogoImage from '../images/sabic international logo.png';
 
 interface DashboardProps {
   user: User;
@@ -667,7 +667,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
       {/* Edit Price Modal */}
       {editingItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white w-full max-w-sm p-6 rounded-lg shadow-xl">
             <h3 className="text-lg font-bold mb-4">Edit Price: {editingItem.name_en}</h3>
             <div className="mb-4">
@@ -709,7 +709,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
       {/* Add Item Modal */}
       {showAddItemModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white w-full max-w-sm p-6 rounded-lg shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold">Add New Item</h3>

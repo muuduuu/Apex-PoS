@@ -113,7 +113,7 @@ export const CreditPaymentModal: React.FC<CreditPaymentModalProps> = ({
                   }`}
                 >
                   <div className="font-bold text-slate-800">{contractor.name}</div>
-                  <div className="text-xs text-slate-600">Outstanding: <span className="font-mono font-bold text-red-600">{contractor.total_credits.toFixed(3)} KWD</span></div>
+                  <div className="text-xs text-slate-600">Outstanding: <span className="font-mono font-bold text-red-600">{(Number(contractor.total_credits) || 0).toFixed(3)} KWD</span></div>
                 </button>
               ))}
             </div>
@@ -134,7 +134,7 @@ export const CreditPaymentModal: React.FC<CreditPaymentModalProps> = ({
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
                 />
                 <div className="text-xs text-slate-500">
-                  Outstanding: {selectedContractor.total_credits.toFixed(3)} KWD
+                  Outstanding: {(Number(selectedContractor.total_credits) || 0).toFixed(3)} KWD
                 </div>
               </div>
 
