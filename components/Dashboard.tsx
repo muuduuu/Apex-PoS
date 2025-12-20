@@ -15,7 +15,7 @@ import {
   X,
   Users as UsersIcon,
 } from 'lucide-react';
-import LogoImage from '../src/images/sabic international logo.png';
+import LogoImage from '../src/images/apex logo.png';
 
 interface DashboardProps {
   user: User;
@@ -237,7 +237,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <h1 className="text-xl font-bold text-slate-800 leading-none">Admin Dashboard</h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-xs text-slate-500 font-medium">
-                Sabic International General Trading &amp; Contracting Co. W.L.L
+                Apex Group International
               </span>
               <span className="text-xs text-slate-400">|</span>
               <span className="text-xs text-slate-500 font-medium">
@@ -245,7 +245,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               </span>
               <span className="text-xs text-slate-400">|</span>
               <span className="text-xs text-slate-500 font-medium">
-                info@sabicintl-kw.com
+                info@apexgroup-intl.com
               </span>
             </div>
           </div>

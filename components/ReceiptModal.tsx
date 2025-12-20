@@ -116,15 +116,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
 <body>
   <div class="receipt">
     <div class="header">
-      <h1>Sabic POS System</h1>
+      <h1>Apex POS System</h1>
       <div class="sub-en">
-        Sabic International General Trading &amp; Contracting Co. W.L.L
+        Apex Group International
       </div>
-      <div class="sub-ar">سابك الدولية للتجارة العامة والمقاولات ش.ذ.م.م</div>
+      <div class="sub-ar">مجموعة أبكس الدولية</div>
       <div class="contact">
         PH: +965 25456301<br/>
-        Email: info@sabicintl-kw.com<br/>
-        www.sabicintl-kw.com
+        Email: info@apexgroup-intl.com<br/>
+        www.apexgroup-intl.com
       </div>
       <div class="receipt-type">
         ${
@@ -284,7 +284,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <p style="margin-top:1mm;font-size:7pt;">${formatDateTime(
         new Date().toISOString(),
       )}</p>
-      <p style="font-size:7pt;">Powered by Sabic POS v1.0</p>
+      <p style="font-size:7pt;">Powered by Apex POS v1.0</p>
     </div>
   </div>
 </body>
@@ -309,12 +309,12 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
         <div className="p-4 font-mono text-sm leading-tight text-black">
           {/* You can keep your existing preview layout here, or simplify */}
           <div className="text-center mb-2 border-b border-dashed border-black pb-2">
-            <h1 className="text-base font-bold">Sabic POS System</h1>
+            <h1 className="text-base font-bold">Apex POS System</h1>
             <p className="text-[11px]">
-              Sabic International General Trading &amp; Contracting Co. W.L.L
+              Apex Group International
             </p>
             <p className="text-[11px] font-arabic">
-              سابك الدولية للتجارة العامة والمقاولات ش.ذ.م.م
+              مجموعة أبكس الدولية
             </p>
           </div>
           <p className="text-xs mb-1">

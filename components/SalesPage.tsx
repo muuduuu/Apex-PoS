@@ -21,7 +21,7 @@ import {
 import ChequeIcon from '../src/images/iconamoon--cheque.svg';
 import CashIcon from '../src/images/tabler--cash-banknote.svg';
 import CreditCardIcon from '../src/images/material-symbols-light--credit-card-outline.svg';
-import LogoImage from '../src/images/sabic international logo.png';
+import LogoImage from '../src/images/apex logo.png';
 
 interface SalesPageProps {
   user: User;
@@ -315,7 +315,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               </span>
               <span className="text-xs text-slate-400">|</span>
               <span className="text-xs text-slate-500 font-medium">
-                info@sabicintl-kw.com
+                info@apexgroup-intl.com
               </span>
             </div>
           </div>
