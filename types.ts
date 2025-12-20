@@ -6,6 +6,32 @@ export interface User {
   name: string;
   role: UserRole;
 }
+// src/types/index.ts
+export interface Contractor {
+  id: number;
+  name: string;
+  company_name?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  credit_limit: number;
+  total_credits: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+export interface CreditTransaction {
+  id: number;
+  contractor_id: number;
+  sale_id?: number;
+  transaction_type: 'credit_sale' | 'payment' | 'adjustment';
+  amount: number;
+  description: string;
+  balance_after: number;
+  created_at: string;
+  created_by: number;
+}
+
 
 export interface Item {
   id: number;

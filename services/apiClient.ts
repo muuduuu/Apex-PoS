@@ -1,4 +1,4 @@
-import { User, Item, Sale, SaleItem, DailyReport, Refund, AuditLog, PaymentMethod } from '../types';
+import { User, Item, Sale, SaleItem, DailyReport, Refund, AuditLog, PaymentMethod, Contractor } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -266,6 +266,62 @@ class APIClient {
     if (!response.ok) throw new APIError(response.status, 'Failed to export sales data');
     return response.blob();
   }
+  
+async getContractors(): Promise<Contractor[]> {
+  const response = await fetch(`${API_BASE}/contractors`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse<Contractor[]>(response);
+}
+
+  async getContractor(id: number): Promise<Contractor> {
+    const response = await fetch(`${API_BASE}/contractors/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<Contractor>(response);
+  }
+
+  async createContractor(data: Partial<Contractor>): Promise<Contractor> {
+    const response = await fetch(`${API_BASE}/contractors`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse<Contractor>(response);
+  }
+
+async createCreditSale(saleData: {
+  contractor_id: number;
+  items: SaleItem[];
+  subtotal: number;
+  discount_amount: number;
+  discount_percentage: number;
+  total_amount: number;
+  notes: string;
+}): Promise<Sale> {
+  const response = await fetch(`${API_BASE}/credit-sales`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(saleData),
+  });
+  return handleResponse<Sale>(response);
+}
+
+async processPayment(contractor_id: number, amount: number, payment_method: string, description: string) {
+  const response = await fetch(`${API_BASE}/credit-payments`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ contractor_id, amount, payment_method, description }),
+  });
+  return handleResponse(response);
+}
+
+async getCreditReport(contractorId: number) {
+  const response = await fetch(`${API_BASE}/credit-report/${contractorId}`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
+}
 
   // ==================== AUDIT LOGS ====================
 

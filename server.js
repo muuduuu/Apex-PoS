@@ -539,7 +539,239 @@ app.get('/api/reports/sales-csv', authenticateJWT, async (req, res) => {
     res.status(500).json({ error: 'Failed to export CSV' });
   }
 });
+app.get('/api/contractors', authenticateJWT, async (req, res) => {
+  try {
+    const result = await query(
+      'SELECT id, name, company_name, phone, email, credit_limit, total_credits, status FROM contractors WHERE status = $1 ORDER BY name',
+      ['active']
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching contractors:', error);
+    res.status(500).json({ error: 'Failed to fetch contractors' });
+  }
+});
 
+// CREATE new contractor
+app.post('/api/contractors', authenticateJWT, async (req, res) => {
+  try {
+    const { name, company_name, phone, email, address, credit_limit } = req.body;
+
+    if (!name?.trim()) {
+      return res.status(400).json({ error: 'Contractor name required' });
+    }
+
+    const result = await query(
+      `INSERT INTO contractors (name, company_name, phone, email, address, credit_limit, total_credits)
+       VALUES ($1, $2, $3, $4, $5, $6, 0)
+       RETURNING id, name, company_name, phone, email, credit_limit, total_credits, status`,
+      [name.trim(), company_name || null, phone || null, email || null, address || null, credit_limit || 10000]
+    );
+
+    await query(
+      'INSERT INTO audit_logs (user_id, action, details, contractor_id) VALUES ($1, $2, $3, $4)',
+      [req.user.id, 'CREATE_CONTRACTOR', `Created contractor: ${name}`, result.rows[0].id]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating contractor:', error);
+    res.status(500).json({ error: 'Failed to create contractor' });
+  }
+});
+
+// GET contractor details + credit history
+app.get('/api/contractors/:id', authenticateJWT, async (req, res) => {
+  try {
+    const contractor = await query(
+      'SELECT * FROM contractors WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (contractor.rows.length === 0) {
+      return res.status(404).json({ error: 'Contractor not found' });
+    }
+
+    // Get credit history
+    const history = await query(
+      `SELECT id, transaction_type, amount, description, balance_after, created_at, created_by
+       FROM credit_transactions WHERE contractor_id = $1
+       ORDER BY created_at DESC LIMIT 50`,
+      [req.params.id]
+    );
+
+    res.json({
+      contractor: contractor.rows[0],
+      history: history.rows
+    });
+  } catch (error) {
+    console.error('Error fetching contractor:', error);
+    res.status(500).json({ error: 'Failed to fetch contractor' });
+  }
+});
+
+// ==================== CREDIT SALES ====================
+
+// POST credit sale (when payment_method = 'credit')
+app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
+  try {
+    const {
+      contractor_id,
+      items,
+      subtotal,
+      discount_amount,
+      discount_percentage,
+      total_amount,
+      notes
+    } = req.body;
+
+    // Validate contractor exists
+    const contractorResult = await query(
+      'SELECT id, total_credits, credit_limit FROM contractors WHERE id = $1',
+      [contractor_id]
+    );
+
+    if (contractorResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Contractor not found' });
+    }
+
+    const contractor = contractorResult.rows[0];
+    const newTotalCredits = contractor.total_credits + total_amount;
+
+    // Check credit limit
+    if (newTotalCredits > contractor.credit_limit) {
+      return res.status(400).json({
+        error: `Credit limit exceeded. Current: ${contractor.total_credits}, Limit: ${contractor.credit_limit}, Would be: ${newTotalCredits}`
+      });
+    }
+
+    // Generate sale number
+    const saleNumberResult = await query(
+      "SELECT LPAD((COALESCE(MAX(CAST(SUBSTRING(sale_number FROM 11) AS INTEGER)), 0) + 1)::text, 6, '0') as next_num FROM sales WHERE sale_number LIKE 'SALE-2025-%'"
+    );
+    const sale_number = `SALE-2025-${saleNumberResult.rows[0].next_num}`;
+
+    // Create sale
+    const saleResult = await query(
+      `INSERT INTO sales (sale_number, user_id, subtotal, discount_amount, discount_percentage, total_amount, payment_method, notes, status, sale_date)
+       VALUES ($1, $2, $3, $4, $5, $6, 'credit', $7, 'completed', NOW())
+       RETURNING *`,
+      [sale_number, req.user.id, subtotal, discount_amount, discount_percentage, total_amount, notes]
+    );
+
+    const sale = saleResult.rows[0];
+
+    // Add sale items
+    for (const item of items) {
+      await query(
+        `INSERT INTO sale_items (sale_id, item_id, item_name_en, item_name_ar, quantity, unit_price, line_total)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [sale.id, item.item_id, item.item_name_en, item.item_name_ar, item.quantity, item.unit_price, item.line_total]
+      );
+    }
+
+    // Update contractor credits
+    await query(
+      'UPDATE contractors SET total_credits = $1, updated_at = NOW() WHERE id = $2',
+      [newTotalCredits, contractor_id]
+    );
+
+    // Log credit transaction
+    await query(
+      `INSERT INTO credit_transactions (contractor_id, sale_id, transaction_type, amount, description, balance_after, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [contractor_id, sale.id, 'credit_sale', total_amount, `Sale ${sale_number}`, newTotalCredits, req.user.id]
+    );
+
+    // Audit log
+    await query(
+      'INSERT INTO audit_logs (user_id, action, details, contractor_id) VALUES ($1, $2, $3, $4)',
+      [req.user.id, 'CREDIT_SALE', `Credit sale ${sale_number} for ${total_amount} KWD`, contractor_id]
+    );
+
+    res.status(201).json({ sale, contractor_balance: newTotalCredits });
+  } catch (error) {
+    console.error('Error creating credit sale:', error);
+    res.status(500).json({ error: 'Failed to create credit sale' });
+  }
+});
+
+// ==================== CREDIT PAYMENTS ====================
+
+// POST credit payment (contractor pays back)
+app.post('/api/credit-payments', authenticateJWT, async (req, res) => {
+  try {
+    const { contractor_id, amount, payment_method, description } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Payment amount must be greater than 0' });
+    }
+
+    // Get contractor
+    const contractorResult = await query(
+      'SELECT id, total_credits FROM contractors WHERE id = $1',
+      [contractor_id]
+    );
+
+    if (contractorResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Contractor not found' });
+    }
+
+    const contractor = contractorResult.rows[0];
+    const newTotalCredits = Math.max(0, contractor.total_credits - amount);
+
+    // Update contractor credits
+    await query(
+      'UPDATE contractors SET total_credits = $1, updated_at = NOW() WHERE id = $2',
+      [newTotalCredits, contractor_id]
+    );
+
+    // Log credit transaction
+    const txnResult = await query(
+      `INSERT INTO credit_transactions (contractor_id, transaction_type, amount, description, balance_after, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [contractor_id, 'payment', amount, description || `${payment_method} payment`, newTotalCredits, req.user.id]
+    );
+
+    // Audit log
+    await query(
+      'INSERT INTO audit_logs (user_id, action, details, contractor_id) VALUES ($1, $2, $3, $4)',
+      [req.user.id, 'CREDIT_PAYMENT', `Payment of ${amount} KWD received from contractor`, contractor_id]
+    );
+
+    res.status(201).json({
+      transaction: txnResult.rows[0],
+      contractor_balance: newTotalCredits
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({ error: 'Failed to process payment' });
+  }
+});
+
+// GET contractor credit report
+app.get('/api/credit-report/:contractorId', authenticateJWT, async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT c.*, 
+              (SELECT COUNT(*) FROM credit_transactions WHERE contractor_id = c.id) as transaction_count,
+              (SELECT SUM(amount) FROM credit_transactions WHERE contractor_id = c.id AND transaction_type = 'credit_sale') as total_debts,
+              (SELECT SUM(amount) FROM credit_transactions WHERE contractor_id = c.id AND transaction_type = 'payment') as total_paid
+       FROM contractors c WHERE c.id = $1`,
+      [req.params.contractorId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Contractor not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching credit report:', error);
+    res.status(500).json({ error: 'Failed to fetch credit report' });
+  }
+});
 // ==================== AUDIT LOGS ====================
 
 // GET /api/audit-logs - ✅ UPDATED: Protected, admin only
