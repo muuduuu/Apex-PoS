@@ -342,7 +342,7 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
           </button>
            <button
     onClick={() => setShowPaymentModal(true)}
-    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5"
+    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#26aae1] to-[#0b51a1] text-white rounded-lg hover:shadow-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5"
   >
     <Wallet className="w-4 h-4" />
     Receive Credit Payment / استلام دفعة آجلة
