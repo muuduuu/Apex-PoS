@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { apiClient } from '../services/apiClient';
 import { User } from '../types';
 import { Lock, User as UserIcon } from 'lucide-react';
-import LogoImage from '../src/images/apex logo.png';
+import LogoImage from '../src/images/Apex Logo.png';
 
 interface LoginPageProps {
   onLogin: (user: User) => void;

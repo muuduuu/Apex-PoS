@@ -21,7 +21,7 @@ import {
 import ChequeIcon from '../src/images/iconamoon--cheque.svg';
 import CashIcon from '../src/images/tabler--cash-banknote.svg';
 import CreditCardIcon from '../src/images/material-symbols-light--credit-card-outline.svg';
-import LogoImage from '../src/images/apex logo.png';
+import LogoImage from '../src/images/Apex Logo.png';
 
 interface SalesPageProps {
   user: User;
