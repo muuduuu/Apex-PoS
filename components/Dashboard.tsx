@@ -228,13 +228,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#e8f4f8] via-slate-100 to-[#d4e9f7] flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-20">
-        <div className="flex items-center gap-4">
-          <img src={LogoImage} alt="Sabic Logo" className="h-14" />
+      <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shadow-md sticky top-0 z-20 backdrop-blur-sm bg-white/95">
+        <div className="flex items-center gap-4 animate-in fade-in slide-in-from-left duration-500">
+          <img src={LogoImage} alt="Apex Logo" className="h-14 transition-transform hover:scale-105 duration-300" />
           <div className="border-l border-slate-300 pl-4">
-            <h1 className="text-xl font-bold text-slate-800 leading-none">Admin Dashboard</h1>
+            <h1 className="text-xl font-bold text-[#0b51a1] leading-none">Admin Dashboard</h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-xs text-slate-500 font-medium">
                 Apex Group International
@@ -252,43 +252,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </div>
 
         {/* Nav Tabs */}
-        <div className="flex bg-slate-100 p-1 rounded-lg">
+        <div className="flex bg-slate-100 p-1 rounded-lg shadow-inner">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
               activeTab === 'overview'
-                ? 'bg-white shadow text-[#3c589e]'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-gradient-to-r from-[#0b51a1] to-[#26aae1] shadow-lg text-white transform scale-105'
+                : 'text-slate-500 hover:text-[#0b51a1] hover:bg-white/50'
             }`}
           >
             Overview
           </button>
           <button
             onClick={() => setActiveTab('inventory')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
               activeTab === 'inventory'
-                ? 'bg-white shadow text-[#3c589e]'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-gradient-to-r from-[#0b51a1] to-[#26aae1] shadow-lg text-white transform scale-105'
+                : 'text-slate-500 hover:text-[#0b51a1] hover:bg-white/50'
             }`}
           >
             Inventory
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
               activeTab === 'users'
-                ? 'bg-white shadow text-[#3c589e]'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-gradient-to-r from-[#0b51a1] to-[#26aae1] shadow-lg text-white transform scale-105'
+                : 'text-slate-500 hover:text-[#0b51a1] hover:bg-white/50'
             }`}
           >
             Users
           </button>
           <button
             onClick={() => setActiveTab('audit')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
               activeTab === 'audit'
-                ? 'bg-white shadow text-[#3c589e]'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-gradient-to-r from-[#0b51a1] to-[#26aae1] shadow-lg text-white transform scale-105'
+                : 'text-slate-500 hover:text-[#0b51a1] hover:bg-white/50'
             }`}
           >
             Audit Logs
@@ -298,7 +298,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         <div className="flex items-center gap-4">
           <button
             onClick={onLogout}
-            className="text-sm text-slate-500 hover:text-[#ff4033] font-medium px-4 py-2 hover:bg-red-50 rounded-lg transition-colors"
+            className="text-sm text-slate-500 hover:text-[#ff6b35] font-medium px-4 py-2 hover:bg-red-50 rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
           >
             Logout
           </button>
@@ -330,7 +330,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           <>
             {/* Controls */}
             <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-2 bg-white p-2 rounded-lg border shadow-sm">
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-lg border shadow-sm">
                 <Calendar className="w-4 h-4 text-slate-500 ml-2" />
                 <input
                   type="date"
@@ -342,7 +342,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <button
                 onClick={handleExport}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-[#3c589e] text-white rounded-lg hover:bg-[#2f4377] shadow-sm transition-colors text-sm font-medium disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white rounded-lg hover:shadow-lg transition-all duration-300 text-sm font-medium disabled:opacity-50 transform hover:scale-105 hover:-translate-y-0.5"
               >
                 <Download className="w-4 h-4" /> Export Report (CSV)
               </button>
@@ -354,39 +354,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <>
                 {/* KPI Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-in fade-in slide-in-from-bottom duration-500">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 bg-[#3c589e]/10 rounded-lg text-[#3c589e]">
+                      <div className="p-3 bg-gradient-to-br from-[#0b51a1] to-[#26aae1] rounded-xl text-white shadow-md">
                         <TrendingUp className="w-6 h-6" />
                       </div>
                     </div>
                     <h3 className="text-slate-500 text-sm font-medium">Daily Revenue</h3>
-                    <p className="text-3xl font-bold text-slate-800 mt-1">
+                    <p className="text-3xl font-bold bg-gradient-to-r from-[#0b51a1] to-[#26aae1] bg-clip-text text-transparent mt-1">
                       {format3(report.total_revenue)}{' '}
                       <span className="text-sm font-normal text-slate-400">KWD</span>
                     </p>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-in fade-in slide-in-from-bottom duration-700">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 bg-[#3c589e]/10 rounded-lg text-[#3c589e]">
+                      <div className="p-3 bg-gradient-to-br from-[#26aae1] to-[#0b51a1] rounded-xl text-white shadow-md">
                         <ShoppingBag className="w-6 h-6" />
                       </div>
                     </div>
                     <h3 className="text-slate-500 text-sm font-medium">Sales Count</h3>
-                    <p className="text-3xl font-bold text-slate-800 mt-1">
+                    <p className="text-3xl font-bold text-[#0b51a1] mt-1">
                       {report.total_sales_count}
                     </p>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-in fade-in slide-in-from-bottom duration-1000">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 bg-[#3c589e]/10 rounded-lg text-[#3c589e]">
+                      <div className="p-3 bg-gradient-to-br from-[#ff6b35] to-[#ff8c61] rounded-xl text-white shadow-md">
                         <CreditCard className="w-6 h-6" />
                       </div>
                     </div>
                     <h3 className="text-slate-500 text-sm font-medium">Average Ticket</h3>
-                    <p className="text-3xl font-bold text-slate-800 mt-1">
+                    <p className="text-3xl font-bold text-[#ff6b35] mt-1">
                       {report.total_sales_count
                         ? format3(Number(report.total_revenue || 0) / report.total_sales_count)
                         : '0.000'}{' '}
@@ -397,7 +397,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Payment Methods */}
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">
                       Revenue by Payment Method
                     </h3>
@@ -414,9 +414,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                                 {format3(value)} KWD ({percentage.toFixed(1)}%)
                               </span>
                             </div>
-                            <div className="w-full bg-slate-100 rounded-full h-2.5">
+                            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                               <div
-                                className="bg-[#3c589e] h-2.5 rounded-full"
+                                className="bg-gradient-to-r from-[#0b51a1] to-[#26aae1] h-2.5 rounded-full transition-all duration-500 ease-out"
                                 style={{ width: `${percentage}%` }}
                               ></div>
                             </div>
@@ -427,7 +427,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   </div>
 
                   {/* Top Items List */}
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
                     <h3 className="text-lg font-bold text-slate-800 mb-6">Top Selling Items</h3>
                     <div className="overflow-hidden">
                       <table className="w-full text-left">
@@ -462,14 +462,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </>
         ) : activeTab === 'inventory' ? (
           /* INVENTORY TAB */
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20 animate-in fade-in slide-in-from-right duration-500">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <Package className="w-5 h-5 text-[#3c589e]" /> Item Management
+              <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2">
+                <Package className="w-5 h-5 text-[#26aae1]" /> Item Management
               </h2>
               <button
                 onClick={() => setShowAddItemModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#3c589e] text-white rounded-lg hover:bg-[#2f4377] shadow-sm transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c61] text-white rounded-lg hover:shadow-lg transition-all duration-300 text-sm font-medium transform hover:scale-105 hover:-translate-y-0.5"
               >
                 <Plus className="w-4 h-4" /> Add Item
               </button>
@@ -521,14 +521,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                               setNewPrice(String(item.price_per_unit ?? ''));
                             }}
                             disabled={itemLoading}
-                            className="text-[#3c589e] hover:text-[#2f4377] text-sm font-medium underline disabled:opacity-50"
+                            className="text-[#0b51a1] hover:text-[#26aae1] text-sm font-medium underline disabled:opacity-50 transition-all duration-200 hover:scale-110"
                           >
                             Edit Price
                           </button>
                           <button
                             onClick={() => handleDeleteItem(item.id)}
                             disabled={itemLoading || deletingItemId === item.id}
-                            className="text-[#ff4033] hover:text-[#e6362b] text-sm font-medium disabled:opacity-50"
+                            className="text-[#ff6b35] hover:text-[#ff4033] text-sm font-medium disabled:opacity-50 transition-all duration-200 hover:scale-110"
                           >
                             {deletingItemId === item.id ? (
                               'Deleting...'
@@ -546,10 +546,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </div>
         ) : activeTab === 'users' ? (
           /* USERS TAB */
-          <div className="grid grid-cols-1 max-w-md mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-6">
-                <UsersIcon className="w-5 h-5 text-[#3c589e]" /> Create New User
+          <div className="grid grid-cols-1 max-w-md mx-auto animate-in fade-in slide-in-from-bottom duration-500">
+            <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
+              <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
+                <UsersIcon className="w-5 h-5 text-[#26aae1]" /> Create New User
               </h2>
 
               <form onSubmit={handleCreateUser} className="space-y-4">
@@ -559,7 +559,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   </label>
                   <input
                     type="text"
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#3c589e] focus:border-[#3c589e] outline-none"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
                     value={newUsername}
                     onChange={e => setNewUsername(e.target.value)}
                     placeholder="e.g., cashier1"
@@ -574,7 +574,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   </label>
                   <input
                     type="password"
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#3c589e] focus:border-[#3c589e] outline-none"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                     placeholder="Enter secure password"
@@ -588,7 +588,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     Role
                   </label>
                   <select
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#3c589e] focus:border-[#3c589e] outline-none"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
                     value={newRole}
                     onChange={e => setNewRole(e.target.value as 'cashier' | 'admin')}
                     disabled={userLoading}
@@ -601,14 +601,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 <button
                   type="submit"
                   disabled={userLoading}
-                  className="w-full bg-[#3c589e] hover:bg-[#2f4377] text-white text-sm font-semibold py-2.5 rounded-lg disabled:opacity-60 transition-colors"
+                  className="w-full bg-gradient-to-r from-[#0b51a1] to-[#26aae1] hover:shadow-lg text-white text-sm font-semibold py-2.5 rounded-lg disabled:opacity-60 transition-all duration-300 transform hover:scale-105"
                 >
                   {userLoading ? 'Creating User...' : 'Create User'}
                 </button>
               </form>
 
-              <div className="mt-6 p-4 bg-[#3c589e]/10 rounded-lg border border-[#3c589e]/20">
-                <p className="text-xs text-[#3c589e]">
+              <div className="mt-6 p-4 bg-gradient-to-r from-[#0b51a1]/10 to-[#26aae1]/10 rounded-lg border border-[#26aae1]/20">
+                <p className="text-xs text-[#0b51a1]">
                   <strong>ℹ️ Tip:</strong> Create cashier accounts for POS operators. Each user gets
                   their own login credentials.
                 </p>
@@ -617,9 +617,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </div>
         ) : (
           /* AUDIT LOG TAB */
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-6">
-              <Activity className="w-5 h-5 text-[#3c589e]" /> System Audit Logs
+          <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20 animate-in fade-in slide-in-from-left duration-500">
+            <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
+              <Activity className="w-5 h-5 text-[#26aae1]" /> System Audit Logs
             </h2>
             {loading && logs.length === 0 ? (
               <div className="text-center py-8 text-slate-500">Loading audit logs...</div>
@@ -691,14 +691,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   setNewPrice('');
                 }}
                 disabled={itemLoading}
-                className="flex-1 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                className="flex-1 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-all duration-200 hover:shadow-md"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdatePrice}
                 disabled={itemLoading}
-                className="flex-1 py-2 bg-[#3c589e] text-white rounded hover:bg-[#2f4377] disabled:opacity-50"
+                className="flex-1 py-2 bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white rounded hover:shadow-lg disabled:opacity-50 transition-all duration-300 transform hover:scale-105"
               >
                 {itemLoading ? 'Saving...' : 'Save'}
               </button>
@@ -780,14 +780,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <button
                 onClick={() => setShowAddItemModal(false)}
                 disabled={itemLoading}
-                className="flex-1 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                className="flex-1 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-all duration-200 hover:shadow-md"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddItem}
                 disabled={itemLoading}
-                className="flex-1 py-2 bg-[#3c589e] text-white rounded hover:bg-[#2f4377] disabled:opacity-50"
+                className="flex-1 py-2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c61] text-white rounded hover:shadow-lg disabled:opacity-50 transition-all duration-300 transform hover:scale-105"
               >
                 {itemLoading ? 'Creating...' : 'Create Item'}
               </button>

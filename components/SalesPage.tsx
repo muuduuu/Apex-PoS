@@ -296,13 +296,13 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   }
 
   return (
-    <div className="flex flex-col lg:h-screen bg-slate-100 min-h-screen">
+    <div className="flex flex-col lg:h-screen bg-gradient-to-br from-[#e8f4f8] via-slate-100 to-[#d4e9f7] min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm z-10 shrink-0 sticky top-0">
-        <div className="flex items-center gap-4">
-          <img src={LogoImage} alt="Logo" className="h-12" />
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-md z-10 shrink-0 sticky top-0 backdrop-blur-sm bg-white/95">
+        <div className="flex items-center gap-4 animate-in fade-in slide-in-from-left duration-500">
+          <img src={LogoImage} alt="Logo" className="h-12 transition-transform hover:scale-105 duration-300" />
           <div className="border-l border-slate-300 pl-4">
-            <h1 className="text-xl font-bold text-slate-800 leading-none">
+            <h1 className="text-xl font-bold text-[#0b51a1] leading-none">
               POS Terminal / نقطة بيع
             </h1>
             <div className="flex items-center gap-4 mt-1">
@@ -323,21 +323,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowSalesHistory(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#3d579f] text-white rounded-lg hover:bg-[#2f4377] text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white rounded-lg hover:shadow-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5"
           >
             <History className="w-4 h-4" />
             <span className="hidden md:inline">Sales History / سجل المبيعات</span>
           </button>
           <button
             onClick={() => setShowRefundModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#ff4033] text-white rounded-lg hover:bg-[#e6362b] text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c61] text-white rounded-lg hover:shadow-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5"
           >
             <RotateCcw className="w-4 h-4" />
             <span className="hidden md:inline">Refund / استرجاع</span>
           </button>
           <button
             onClick={onLogout}
-            className="text-sm text-slate-500 hover:text-[#ff4033] font-medium ml-4 transition-colors"
+            className="text-sm text-slate-500 hover:text-[#ff6b35] font-medium ml-4 transition-all duration-300 hover:scale-110"
           >
             Logout / تسجيل الخروج
           </button>
@@ -362,8 +362,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         {/* Left Column */}
         <div className="flex-1 flex flex-col overflow-y-auto p-4 lg:p-6 gap-6">
           {/* Quick Select Grid */}
-          <div className="shrink-0">
-            <h2 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wide">
+          <div className="shrink-0 bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-[#26aae1]/20">
+            <h2 className="text-sm font-bold text-[#0b51a1] mb-3 uppercase tracking-wide">
               Quick Select Product / اختيار سريع للمنتج
             </h2>
             {items.length === 0 ? (
@@ -377,10 +377,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                   <button
                     key={item.id}
                     onClick={() => handleQuickSelect(item)}
-                    className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden group ${
+                    className={`p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group ${
                       selectedItemId === item.id.toString()
-                        ? 'bg-[#3d579f] border-[#3d579f] text-white shadow-md ring-2 ring-[#5a70b5]'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-[#3d579f] hover:shadow-sm'
+                        ? 'bg-gradient-to-br from-[#0b51a1] to-[#26aae1] border-[#26aae1] text-white shadow-xl ring-2 ring-[#26aae1] transform scale-105'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-[#26aae1] hover:shadow-lg transform hover:scale-105 hover:-translate-y-1'
                     }`}
                   >
                     <div className="font-bold text-lg mb-1">{item.name_en}</div>
@@ -412,7 +412,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           </div>
 
           {/* Add Item Controls */}
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 shrink-0">
+          <div className="bg-gradient-to-r from-white to-[#e8f4f8] p-5 rounded-xl shadow-md border border-[#26aae1]/20 shrink-0">
             <div className="flex flex-col md:flex-row gap-4 items-end">
               <div className="flex-1 w-full">
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
@@ -449,7 +449,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               <button
                 onClick={handleAddItem}
                 disabled={!selectedItemId}
-                className="w-full md:w-auto bg-[#3d579f] text-white px-8 py-3 rounded-lg hover:bg-[#2f4377] disabled:opacity-50 disabled:cursor-not-allowed font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
+                className="w-full md:w-auto bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white px-8 py-3 rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-bold transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 hover:-translate-y-0.5"
               >
                 <Plus className="w-5 h-5" />
                 Add to Cart / أضف إلى السلة
@@ -458,7 +458,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
           </div>
 
           {/* Shopping Cart Table */}
-          <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[300px]">
+          <div className="flex-1 bg-gradient-to-br from-white to-[#e8f4f8]/50 rounded-xl shadow-lg border border-[#26aae1]/20 overflow-hidden flex flex-col min-h-[300px] hover:shadow-xl transition-shadow duration-300">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center shrink-0">
               <h2 className="font-bold text-slate-800 flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-slate-600" />
@@ -471,7 +471,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 {cart.length > 0 && (
                   <button
                     onClick={clearCart}
-                    className="text-xs text-[#ff4033] hover:text-[#e6362b] flex items-center gap-1 font-medium px-2 py-1 rounded hover:bg-red-50"
+                    className="text-xs text-[#ff6b35] hover:text-[#ff4033] flex items-center gap-1 font-medium px-2 py-1 rounded hover:bg-red-50 transition-all duration-200 hover:scale-110"
                   >
                     <Eraser className="w-3 h-3" />
                     Clear Cart / مسح السلة
@@ -562,15 +562,15 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
         </div>
 
         {/* Right Column: Payment & Totals */}
-        <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col h-auto lg:h-full overflow-y-auto shrink-0 shadow-xl lg:shadow-none z-20">
+        <div className="w-full lg:w-96 bg-gradient-to-b from-white to-[#e8f4f8]/40 border-t lg:border-t-0 lg:border-l border-[#26aae1]/30 flex flex-col h-auto lg:h-full overflow-y-auto shrink-0 shadow-2xl lg:shadow-none z-20">
           <div className="p-6 flex flex-col h-full">
-            <h2 className="text-lg font-bold text-slate-800 mb-6 pb-4 border-b flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-slate-600" />
+            <h2 className="text-lg font-bold text-[#0b51a1] mb-6 pb-4 border-b flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-[#26aae1]" />
               Payment Details / تفاصيل الدفع
             </h2>
 
             {/* Calculations */}
-            <div className="space-y-4 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="space-y-4 mb-8 bg-gradient-to-br from-[#e8f4f8]/30 to-white p-4 rounded-xl border border-[#26aae1]/20 shadow-inner">
               <div className="flex justify-between text-slate-600 text-sm">
                 <span>Subtotal / المجموع الفرعي</span>
                 <span className="font-mono font-medium">
@@ -627,7 +627,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 <span className="text-lg font-bold text-slate-800">
                   TOTAL DUE / المبلغ المستحق
                 </span>
-                <span className="text-3xl font-extrabold text-[#3d579f] leading-none">
+                <span className="text-3xl font-extrabold bg-gradient-to-r from-[#0b51a1] to-[#26aae1] bg-clip-text text-transparent leading-none">
                   {totalAmount.toFixed(3)}{' '}
                   <span className="text-sm text-slate-500 font-normal">
                     KWD / د.ك
@@ -654,10 +654,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     <button
                       key={method.id}
                       onClick={() => setPaymentMethod(method.id as PaymentMethod)}
-                      className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all relative ${
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300 relative transform ${
                         isSelected
-                          ? 'border-[#3d579f] bg-[#3d579f]/10 text-[#3d579f] shadow-sm'
-                          : 'border-slate-100 bg-white hover:border-[#3d579f]/30 hover:bg-slate-50 text-slate-600'
+                          ? 'border-[#0b51a1] bg-gradient-to-br from-[#0b51a1]/10 to-[#26aae1]/10 text-[#0b51a1] shadow-lg scale-105'
+                          : 'border-slate-100 bg-white hover:border-[#26aae1]/50 hover:bg-slate-50 text-slate-600 hover:scale-105 hover:shadow-md'
                       }`}
                     >
                       {method.icon === 'custom-cash' ? (
@@ -705,25 +705,25 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
 
               {/* Dynamic Inputs based on Method */}
               {paymentMethod === 'knet' && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-[#3d579f]/10 p-4 rounded-xl border border-[#3d579f]/20 shadow-sm">
-                  <label className="block text-xs font-bold text-[#3d579f] mb-1 uppercase">
+                <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-gradient-to-r from-[#0b51a1]/10 to-[#26aae1]/10 p-4 rounded-xl border border-[#26aae1]/30 shadow-sm">
+                  <label className="block text-xs font-bold text-[#0b51a1] mb-1 uppercase">
                     KNET Reference Number / رقم مرجع كي نت{' '}
-                    <span className="text-[#ff4033]">*</span>
+                    <span className="text-[#ff6b35]">*</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Enter reference number / أدخل رقم المرجع"
-                    className={`w-full p-3 border rounded-lg outline-none focus:ring-2 font-mono ${
+                    className={`w-full p-3 border rounded-lg outline-none focus:ring-2 font-mono transition-all duration-200 ${
                       !knetRef
-                        ? 'border-[#ff4033]/30 focus:ring-[#ff4033]/20 bg-white'
-                        : 'border-[#3d579f]/30 focus:ring-[#3d579f]/20 bg-white'
+                        ? 'border-[#ff6b35]/30 focus:ring-[#ff6b35]/20 bg-white'
+                        : 'border-[#26aae1]/30 focus:ring-[#26aae1]/20 bg-white'
                     }`}
                     value={knetRef}
                     onChange={e => setKnetRef(e.target.value)}
                     autoFocus
                   />
                   {!knetRef && (
-                    <p className="text-xs text-[#ff4033] mt-1 font-medium">
+                    <p className="text-xs text-[#ff6b35] mt-1 font-medium">
                       Reference is mandatory. / رقم المرجع إجباري.
                     </p>
                   )}
@@ -738,10 +738,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                   <input
                     type="text"
                     placeholder="Enter cheque number / أدخل رقم الشيك"
-                    className={`w-full p-3 border rounded-lg outline-none focus:ring-2 font-mono ${
+                    className={`w-full p-3 border rounded-lg outline-none focus:ring-2 font-mono transition-all duration-200 ${
                       !chequeNum
-                        ? 'border-[#ff4033]/30 focus:ring-[#ff4033]/20 bg-white'
-                        : 'border-slate-300 focus:ring-[#3d579f]/20 bg-white'
+                        ? 'border-[#ff6b35]/30 focus:ring-[#ff6b35]/20 bg-white'
+                        : 'border-slate-300 focus:ring-[#26aae1]/20 bg-white'
                     }`}
                     value={chequeNum}
                     onChange={e => setChequeNum(e.target.value)}
@@ -760,10 +760,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 ${
+                className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-xl transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 ${
                   !canSubmit
                     ? 'bg-slate-300 cursor-not-allowed shadow-none'
-                    : 'bg-[#3d579f] hover:bg-[#2f4377] hover:shadow-[#3d579f]/20 shadow-[#3d579f]/10'
+                    : 'bg-gradient-to-r from-[#0b51a1] to-[#26aae1] hover:shadow-2xl hover:shadow-[#26aae1]/30 hover:scale-105 hover:-translate-y-1'
                 }`}
               >
                 {processing ? (
@@ -788,7 +788,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                   </p>
                 )}
                 {!isCartEmpty && !isPaymentSelected && (
-                  <p className="text-xs text-[#ff4033] font-medium animate-pulse">
+                  <p className="text-xs text-[#ff6b35] font-medium animate-pulse">
                     Select a payment method. / اختر طريقة الدفع.
                   </p>
                 )}
@@ -874,7 +874,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                     <button
                       onClick={handleSearchSaleForRefund}
                       disabled={refundSearching}
-                      className="bg-[#3d579f] text-white px-6 py-2 rounded-xl font-bold hover:bg-[#2f4377] disabled:opacity-50 transition-colors"
+                      className="bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white px-6 py-2 rounded-xl font-bold hover:shadow-lg disabled:opacity-50 transition-all duration-300 transform hover:scale-105"
                     >
                       {refundSearching ? 'Searching... / جارٍ البحث...' : 'Find / بحث'}
                     </button>
@@ -939,7 +939,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                 <button
                   onClick={handleProcessRefund}
                   disabled={!refundReason || processing}
-                  className="w-full bg-[#ff4033] text-white py-4 rounded-xl font-bold hover:bg-[#e6362b] disabled:opacity-50 shadow-lg shadow-[#ff4033]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-[#ff6b35] to-[#ff8c61] text-white py-4 rounded-xl font-bold hover:shadow-2xl disabled:opacity-50 shadow-lg shadow-[#ff6b35]/30 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 transform hover:scale-105 hover:-translate-y-1"
                 >
                   {processing ? (
                     <>
@@ -1034,7 +1034,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
                           <td className="p-3">
         <button
           onClick={() => setSelectedHistorySale(sale)}
-          className="text-xs px-3 py-1 rounded bg-[#3d579f] text-white hover:bg-[#2f4377]"
+          className="text-xs px-3 py-1 rounded bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white hover:shadow-lg transition-all duration-300 transform hover:scale-105"
         >
           View / Print
         </button>
