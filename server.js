@@ -624,7 +624,7 @@ app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
       total_amount,
       notes
     } = req.body;
-
+    
     // Validate contractor exists
     const contractorResult = await query(
       'SELECT id, total_credits, credit_limit FROM contractors WHERE id = $1',
@@ -634,20 +634,14 @@ app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
     if (contractorResult.rows.length === 0) {
       return res.status(404).json({ error: 'Contractor not found' });
     }
+    const contractor = contractorResult.rows[0];
+
     const currentCredits = Number(contractor.total_credits) || 0;
     const limit = Number(contractor.credit_limit) || 0;
     const saleTotal = Number(total_amount) || 0;
 
     const newTotalCredits = currentCredits + saleTotal;
-  if (newTotalCredits > limit) {
-      return res.status(400).json({
-        error: `Credit limit exceeded. Current: ${currentCredits}, Limit: ${limit}, Would be: ${newTotalCredits}`,
-      });
-    }
-    const saleNumberResult = await query(
-      "SELECT LPAD((COALESCE(MAX(CAST(SUBSTRING(sale_number FROM 11) AS INTEGER)), 0) + 1)::text, 6, '0') as next_num FROM sales WHERE sale_number LIKE 'SALE-2025-%'",
-    );
-    const sale_number = `SALE-2025-${saleNumberResult.rows[0].next_num}`;
+ 
 
     // Check credit limit
     if (newTotalCredits > contractor.credit_limit) {
