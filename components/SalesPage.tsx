@@ -450,8 +450,8 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                 <input
                   id="qtyInput"
                   type="number"
-                  min="0.01"
-                  step="0.01"
+                  min="0.5"
+                  step="0.5"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579f] outline-none text-center font-bold text-lg"
                   value={qtyInput}
                   onChange={e => setQtyInput(e.target.value)}
@@ -531,8 +531,8 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                         <td className="p-4 text-center">
                           <input
                             type="number"
-                            min="0.01"
-                            step="0.01"
+                            min="0.5"
+                            step="0.5"
                             className="w-24 p-2 border border-slate-300 rounded text-center focus:ring-2 focus:ring-[#3d579f] outline-none font-medium bg-white"
                             value={item.quantity}
                             onChange={e =>
