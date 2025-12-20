@@ -15,7 +15,7 @@ import {
   X,
   Users as UsersIcon,
 } from 'lucide-react';
-import LogoImage from  '../src/images/Apex Logo.png';
+import LogoImage from '../src/images/Apex Logo.png';
 
 interface DashboardProps {
   user: User;
