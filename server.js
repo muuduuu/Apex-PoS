@@ -29,6 +29,22 @@ app.use(cors({
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+app.get('/health', async (req, res) => {
+  try {
+    await query('SELECT 1');
+    res.json({ 
+      status: 'ok', 
+      database: 'connected', 
+      timestamp: new Date().toISOString() 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'disconnected', 
+      error: error.message 
+    });
+  }
+});
 app.use(express.json());
 
 // ==================== JWT MIDDLEWARE ====================
