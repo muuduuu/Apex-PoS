@@ -21,7 +21,7 @@ const JWT_EXPIRES_IN = '7d';
 
 // Middleware
 app.use(cors({
-  origin: [
+  origin: [ 
     'http://localhost:5173', 'http://localhost:5174',  // Dev
     'https://apexgroupintl.space', 'https://www.apexgroupintl.space'  // Production
   ],
