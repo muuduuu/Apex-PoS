@@ -852,7 +852,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`   cashier1 / cashier123\n`);
   
   // Run migrations after a short delay to ensure DB is ready
-  setTimeout(async () => {
-    await runMigrations();
-  }, 1000);
+ 
 });
