@@ -22,20 +22,8 @@ const JWT_EXPIRES_IN = '7d';
 // Middleware
 app.use(cors({
   origin: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://192.168.1.3:3000',
-    'http://192.168.1.3:5173',
-    'http://192.168.1.3:5174',
-    'http://192.168.1.3:3001',
-    'https://pos-apex.vercel.app',
-    'https://apex-pos-production.up.railway.app'
+    'http://localhost:5173', 'http://localhost:5174',  // Dev
+    'https://apexgroupintl.space', 'https://www.apexgroupintl.space'  // Production
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
@@ -820,7 +808,7 @@ app.get('/health', async (req, res) => {
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`\n${'='.repeat(50)}`);
   console.log('  Kuwait POS Backend API (JWT)');
   console.log(`${'='.repeat(50)}`);
