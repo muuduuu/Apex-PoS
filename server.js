@@ -23,7 +23,8 @@ app.use(cors({
     'http://localhost:5173',
     'http://apexgroupintl.space',
     'https://apexgroupintl.space',
-    'https://www.apexgroupintl.space'
+    'https://www.apexgroupintl.space',
+    'https://pos-apex.vercel.app/'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
