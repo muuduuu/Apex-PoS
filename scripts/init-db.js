@@ -57,6 +57,7 @@ async function initDatabase() {
         id SERIAL PRIMARY KEY,
         sale_number VARCHAR(50) UNIQUE NOT NULL,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        contractor_id INTEGER REFERENCES contractors(id) ON DELETE SET NULL,
         subtotal NUMERIC(10, 3) NOT NULL CHECK (subtotal >= 0),
         discount_amount NUMERIC(10, 3) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0),
         discount_percentage NUMERIC(5, 2) NOT NULL DEFAULT 0 CHECK (discount_percentage >= 0 AND discount_percentage <= 100),
@@ -72,6 +73,7 @@ async function initDatabase() {
       );
       
       CREATE INDEX IF NOT EXISTS idx_sales_user_id ON sales(user_id);
+      CREATE INDEX IF NOT EXISTS idx_sales_contractor_id ON sales(contractor_id);
       CREATE INDEX IF NOT EXISTS idx_sales_sale_number ON sales(sale_number);
       CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(sale_date);
       CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status);

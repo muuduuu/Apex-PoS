@@ -77,7 +77,8 @@ export const CreditSalesModal: React.FC<CreditSalesModalProps> = ({
     try {
       setLoading(true);
       const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
-      const discount = discountType === 'amount' ? parseFloat(discountValue) : (subtotal * parseFloat(discountValue)) / 100;
+      const discountNum = parseFloat(discountValue) || 0;
+      const discount = discountType === 'amount' ? discountNum : (subtotal * discountNum) / 100;
       const totalAmount = Math.max(0, subtotal - discount);
 
       const sale = await apiClient.createCreditSale({
@@ -85,10 +86,14 @@ export const CreditSalesModal: React.FC<CreditSalesModalProps> = ({
         items,
         subtotal,
         discount_amount: discount,
-        discount_percentage: discountType === 'percent' ? parseFloat(discountValue) : 0,
+        discount_percentage: discountType === 'percent' ? discountNum : 0,
         total_amount: totalAmount,
         notes: `Credit sale for ${selectedContractor.name}`,
       });
+
+      console.log('Credit sale response:', sale);
+      console.log('Sale number:', sale?.sale_number);
+      console.log('Total amount:', sale?.total_amount);
 
       onSaleComplete(sale);
       onClose();
@@ -104,7 +109,8 @@ export const CreditSalesModal: React.FC<CreditSalesModalProps> = ({
   );
 
   const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
-  const discount = discountType === 'amount' ? parseFloat(discountValue) : (subtotal * parseFloat(discountValue)) / 100;
+  const discountNum = parseFloat(discountValue) || 0;
+  const discount = discountType === 'amount' ? discountNum : (subtotal * discountNum) / 100;
   const total = Math.max(0, subtotal - discount);
 
   if (!isOpen) return null;

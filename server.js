@@ -316,7 +316,7 @@ app.get('/api/sales', authenticateJWT, async (req, res) => {
     const { date } = req.query;
 
     let sql = `
-      SELECT s.*, u.name as cashier_name,
+      SELECT s.*, u.name as cashier_name, c.name as contractor_name,
         json_agg(json_build_object(
           'id', si.id,
           'item_id', si.item_id,
@@ -328,6 +328,7 @@ app.get('/api/sales', authenticateJWT, async (req, res) => {
         )) as items
       FROM sales s
       LEFT JOIN users u ON s.user_id = u.id
+      LEFT JOIN contractors c ON s.contractor_id = c.id
       LEFT JOIN sale_items si ON s.id = si.sale_id
     `;
 
@@ -338,7 +339,7 @@ app.get('/api/sales', authenticateJWT, async (req, res) => {
       params = [date];
     }
 
-    sql += ' GROUP BY s.id, u.id ORDER BY s.sale_date DESC';
+    sql += ' GROUP BY s.id, u.id, c.id ORDER BY s.sale_date DESC';
 
     const result = await query(sql, params);
     res.json(result.rows);
@@ -646,10 +647,10 @@ app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
 
     // Create sale
     const saleResult = await query(
-      `INSERT INTO sales (sale_number, user_id, subtotal, discount_amount, discount_percentage, total_amount, payment_method, notes, status, sale_date)
-       VALUES ($1, $2, $3, $4, $5, $6, 'credit', $7, 'completed', NOW())
+      `INSERT INTO sales (sale_number, user_id, contractor_id, subtotal, discount_amount, discount_percentage, total_amount, payment_method, notes, status, sale_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'credit', $8, 'completed', NOW())
        RETURNING *`,
-      [sale_number, req.user.id, subtotal, discount_amount, discount_percentage, total_amount, notes]
+      [sale_number, req.user.id, contractor_id, subtotal, discount_amount, discount_percentage, total_amount, notes]
     );
 
     const sale = saleResult.rows[0];
@@ -682,7 +683,21 @@ app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
       [req.user.id, 'CREDIT_SALE', `Credit sale ${sale_number} for ${total_amount} KWD`, contractor_id]
     );
 
-    res.status(201).json({ sale, contractor_balance: newTotalCredits });
+    // Fetch the complete sale with items to return
+    const itemsResult = await query(
+      'SELECT * FROM sale_items WHERE sale_id = $1',
+      [sale.id]
+    );
+
+    const completeSale = {
+      ...sale,
+      items: itemsResult.rows,
+      cashier_name: req.user.name
+    };
+
+    console.log('Credit Sale Response:', JSON.stringify(completeSale, null, 2));
+
+    res.status(201).json(completeSale);
   } catch (error) {
     console.error('Error creating credit sale:', error);
     res.status(500).json({ error: 'Failed to create credit sale' });
@@ -808,7 +823,7 @@ app.get('/health', async (req, res) => {
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n${'='.repeat(50)}`);
   console.log('  Kuwait POS Backend API (JWT)');
   console.log(`${'='.repeat(50)}`);
@@ -818,4 +833,9 @@ app.listen(PORT, '127.0.0.1', () => {
   console.log(`\n🧪 Test credentials:`);
   console.log(`   admin / admin123`);
   console.log(`   cashier1 / cashier123\n`);
+  
+  // Run migrations after a short delay to ensure DB is ready
+  setTimeout(async () => {
+    await runMigrations();
+  }, 1000);
 });

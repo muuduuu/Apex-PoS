@@ -304,7 +304,21 @@ async createCreditSale(saleData: {
     headers: getAuthHeaders(),
     body: JSON.stringify(saleData),
   });
-  return handleResponse<Sale>(response);
+  const result = await handleResponse<any>(response);
+  console.log('API Client - createCreditSale result:', result);
+  
+  // Unwrap the response if it's wrapped in {sale: ..., contractor_balance: ...}
+  const sale = result.sale || result;
+  console.log('API Client - unwrapped sale:', sale);
+  console.log('API Client - sale_number:', sale?.sale_number);
+  console.log('API Client - total_amount:', sale?.total_amount);
+  
+  // If items are missing, add them from the request data
+  if (!sale.items || sale.items.length === 0) {
+    sale.items = saleData.items;
+  }
+  
+  return sale;
 }
 
 async processPayment(contractor_id: number, amount: number, payment_method: string, description: string) {
