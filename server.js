@@ -14,14 +14,16 @@ console.log('DB INFO:', {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ✅ FIXED CORS - Add this immediately after app = express()
 app.use(cors({
-  origin: 'https://www.apexgroupintl.space',  // Exact frontend origin
+  origin: ['https://apexgroupintl.space', 'https://www.apexgroupintl.space', 'http://localhost:4173'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.options('*', cors());  
+app.use(express.json());
 // ✅ JWT CONFIG
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-12345';
 const JWT_EXPIRES_IN = '7d';
