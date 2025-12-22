@@ -18,17 +18,6 @@ const PORT = process.env.PORT || 3000;
 // ✅ JWT CONFIG
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-12345';
 const JWT_EXPIRES_IN = '7d';
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://apexgroupintl.space',
-    'https://apexgroupintl.space',
-    'https://www.apexgroupintl.space'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 app.get('/health', async (req, res) => {
   try {
