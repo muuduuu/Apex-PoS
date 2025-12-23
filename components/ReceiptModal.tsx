@@ -44,16 +44,16 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       line-height:1.3;
       color:#000;
     }
-    .receipt { width:80mm; padding:3mm; }
+    .receipt { width:80mm; padding:2mm; }
     .header {
       text-align:center;
-      margin-bottom:3mm;
-      padding-bottom:2mm;
+      margin-bottom:2mm;
+      padding-bottom:1mm;
       border-bottom:1px dashed #000;
     }
-    .header h1 { font-size:10pt; font-weight:bold; margin-bottom:1mm; }
-    .header .sub-en { font-size:8pt; }
-    .header .sub-ar { font-size:9pt; font-weight:bold; margin-top:1mm; }
+    .header h1 { font-size:11pt; font-weight:bold; margin-bottom:0.5mm; }
+    .header .sub-en { font-size:8pt; margin-bottom:0.5mm; }
+    .header .sub-ar { font-size:10pt; font-weight:bold; margin-bottom:1mm; }
     .header .contact { font-size:7pt; margin-top:1mm; line-height:1.4; }
     .receipt-type {
       text-align:center;
@@ -82,14 +82,34 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       margin-bottom:2mm;
     }
     table { width:100%; border-collapse:collapse; font-size:8pt; }
-    th { text-align:left; border-bottom:1px solid #000; padding:1mm 0; font-weight:bold; }
+    th { 
+      text-align:left; 
+      border-bottom:1px solid #000; 
+      padding:0.8mm 0; 
+      font-weight:bold;
+      font-size:9pt;
+    }
     th.qty { text-align:center; }
     th.price { text-align:right; }
-    td { padding:1mm 0; border-bottom:1px dashed #ccc; }
-    td.item-name-en { font-weight:bold; }
-    td.item-name-ar { font-size:9pt; }
-    td.qty { text-align:center; }
-    td.price { text-align:right; font-weight:bold; }
+    td { padding:0.8mm 0; border-bottom:1px dashed #ccc; }
+    td.item-name-en { 
+      font-weight:bold; 
+      font-size:9pt;
+    }
+    td.item-name-ar { 
+      font-size:9.5pt; 
+      font-weight:bold;
+    }
+    td.qty { 
+      text-align:center; 
+      font-weight:bold;
+      font-size:9pt;
+    }
+    td.price { 
+      text-align:right; 
+      font-weight:bold;
+      font-size:9pt;
+    }
     .totals-section { margin-bottom:3mm; }
     .total-row {
       display:flex;
@@ -116,6 +136,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
     }
     .footer p { margin:0 0 1mm 0; }
     @page { size:80mm auto; margin:0; }
+    @media print {
+      body { margin: 0 !important; }
+      .receipt { padding: 2mm !important; }
+    }
   </style>
 </head>
 <body>
@@ -125,11 +149,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <div class="sub-en">
         Apex Group International
       </div>
-      <div class="sub-ar">مجموعة أبكس الدولية</div>
+      <div class="sub-ar">شركة مجموعة ابكس انترناشيونال للتجارة العامة و المقاولات</div>
       <div class="contact">
         PH: +965 25456301<br/>
         Email: info@apexgroup-intl.com<br/>
-        www.apexgroup-intl.com
+        [www.apexgroup-intl.com](https://www.apexgroup-intl.com)
       </div>
       <div class="receipt-type">
         ${
@@ -151,8 +175,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       </div>
 
       ${
-        isRefund
-          ? `<div class="info-row" style="font-size:7pt;">Original Sale: ${refund!.sale_id}</div>`
+        isRefund && refund && 'sale_id' in refund
+          ? `<div class="info-row" style="font-size:7pt;">Original Sale: ${refund.sale_id}</div>`
           : ''
       }
 
@@ -227,8 +251,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <div class="total-row">
         <span>-${Number(sale.discount_amount).toFixed(3)} KWD</span>
         <span>Discount / الخصم ${
-          Number(sale.discount_percentage) > 0 ? `(${sale.discount_percentage}%)` : ''
-        }</span>
+            Number(sale.discount_percentage) > 0 ? `(${sale.discount_percentage}%)` : ''
+          }</span>
       </div>`
           : ''
       }
@@ -312,14 +336,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <div className="bg-white w-96 shadow-xl">
         {/* On‑screen preview (short) */}
         <div className="p-4 font-mono text-sm leading-tight text-black">
-          {/* You can keep your existing preview layout here, or simplify */}
           <div className="text-center mb-2 border-b border-dashed border-black pb-2">
             <h1 className="text-base font-bold">Apex POS System</h1>
             <p className="text-[11px]">
               Apex Group International
             </p>
-            <p className="text-[11px] font-arabic">
-              مجموعة أبكس الدولية
+            <p className="text-[12px] font-bold font-arabic">
+              شركة مجموعة ابكس انترناشيونال للتجارة العامة و المقاولات
             </p>
           </div>
           <p className="text-xs mb-1">
