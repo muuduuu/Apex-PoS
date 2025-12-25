@@ -35,7 +35,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html, body {
-      width:80mm;
+      width:76mm; /* Reduced from 80mm to fit printer */
       margin:0;
       padding:0;
       background:#fff;
@@ -44,16 +44,20 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       line-height:1.3;
       color:#000;
     }
-    .receipt { width:80mm; padding:3mm; }
+    .receipt { 
+      width:76mm; 
+      padding:2mm 3mm 2mm 4mm; /* LEFT: 4mm padding fix cut-off */
+      min-height:100vh;
+    }
     .header {
       text-align:center;
-      margin-bottom:3mm;
-      padding-bottom:2mm;
+      margin-bottom:2mm;
+      padding-bottom:1mm;
       border-bottom:1px dashed #000;
     }
-    .header h1 { font-size:10pt; font-weight:bold; margin-bottom:1mm; }
-    .header .sub-en { font-size:8pt; }
-    .header .sub-ar { font-size:9pt; font-weight:bold; margin-top:1mm; }
+    .header h1 { font-size:11pt; font-weight:bold; margin-bottom:0.5mm; }
+    .header .sub-en { font-size:8pt; margin-bottom:0.5mm; }
+    .header .sub-ar { font-size:10pt; font-weight:bold; margin-bottom:1mm; }
     .header .contact { font-size:7pt; margin-top:1mm; line-height:1.4; }
     .receipt-type {
       text-align:center;
@@ -81,25 +85,61 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       border-bottom:1px dashed #000;
       margin-bottom:2mm;
     }
-    table { width:100%; border-collapse:collapse; font-size:8pt; }
-    th { text-align:left; border-bottom:1px solid #000; padding:1mm 0; font-weight:bold; }
+    table { 
+      width:100%; 
+      border-collapse:collapse; 
+      font-size:8pt; 
+      table-layout:fixed;
+    }
+    th { 
+      text-align:left; 
+      border-bottom:1px solid #000; 
+      padding:0.8mm 0; 
+      font-weight:bold;
+      font-size:9pt;
+      font-weight: 900; /* Extra bold headers */
+    }
     th.qty { text-align:center; }
     th.price { text-align:right; }
-    td { padding:1mm 0; border-bottom:1px dashed #ccc; }
-    td.item-name-en { font-weight:bold; }
-    td.item-name-ar { font-size:9pt; }
-    td.qty { text-align:center; }
-    td.price { text-align:right; font-weight:bold; }
+    td { 
+      padding:0.6mm 0; /* Reduced padding */
+      border-bottom:1px dashed #ccc; 
+      font-weight: 900; /* ALL ITEMS EXTRA BOLD */
+    }
+    td.item-name-en { 
+      font-size:8.5pt; /* Slightly smaller to fit */
+      font-weight: 900; /* EXTRA BOLD */
+      padding-right: 1mm;
+    }
+    td.item-name-ar { 
+      font-size:9pt; 
+      font-weight: 900; /* EXTRA BOLD */
+      padding-right: 1mm;
+      direction: rtl;
+    }
+    td.qty { 
+      text-align:center; 
+      font-weight: 900; /* EXTRA BOLD */
+      font-size:9pt;
+      width: 15%; /* Fixed width */
+    }
+    td.price { 
+      text-align:right; 
+      font-weight: 900; /* EXTRA BOLD */
+      font-size:9pt;
+      width: 20%; /* Fixed width */
+    }
     .totals-section { margin-bottom:3mm; }
     .total-row {
       display:flex;
       justify-content:space-between;
       font-size:8pt;
       margin-bottom:1mm;
+      font-weight: 700; /* Bold totals */
     }
     .total-row.final {
-      font-weight:bold;
-      font-size:9pt;
+      font-weight: 900; /* EXTRA BOLD final total */
+      font-size:10pt;
       border-top:1px solid #000;
       border-bottom:1px solid #000;
       padding:1mm 0;
@@ -115,7 +155,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       line-height:1.6;
     }
     .footer p { margin:0 0 1mm 0; }
-    @page { size:80mm auto; margin:0; }
+    @page { size:76mm auto; margin:0; }
+    @media print {
+      body { margin: 0 !important; }
+      .receipt { padding: 2mm 3mm 2mm 4mm !important; }
+    }
   </style>
 </head>
 <body>
@@ -125,7 +169,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <div class="sub-en">
         Apex Group International
       </div>
-      <div class="sub-ar">مجموعة أبكس الدولية</div>
+      <div class="sub-ar">شركة مجموعة ابكس انترناشيونال للتجارة العامة و المقاولات</div>
       <div class="contact">
         PH: +965 25456301<br/>
         Email: info@apexgroup-intl.com<br/>
@@ -151,8 +195,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       </div>
 
       ${
-        isRefund
-          ? `<div class="info-row" style="font-size:7pt;">Original Sale: ${refund!.sale_id}</div>`
+        isRefund && refund && 'sale_id' in refund
+          ? `<div class="info-row" style="font-size:7pt;">Original Sale: ${refund.sale_id}</div>`
           : ''
       }
 
@@ -183,7 +227,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <table>
         <thead>
           <tr>
-            <th>Item/البند</th>
+            <th style="width:65%;">Item/البند</th>
             <th class="qty">Qty</th>
             <th class="price">Price</th>
           </tr>
@@ -237,7 +281,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
         <span>${Number(sale.total_amount).toFixed(3)} KWD</span>
         <span>TOTAL / الصافي</span>
       </div>
-      <div style="text-align:right;font-weight:bold;font-size:9pt;">
+      <div style="text-align:right;font-weight:900;font-size:10pt;">
         ${Number(sale.total_amount).toFixed(3)} د.ك
       </div>`
           : ''
@@ -250,7 +294,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
         <span>${Number(refund!.amount).toFixed(3)} KWD</span>
         <span>Refund Amount</span>
       </div>
-      <div style="text-align:right;font-weight:bold;font-size:9pt;">
+      <div style="text-align:right;font-weight:900;font-size:10pt;">
         ${Number(refund!.amount).toFixed(3)} د.ك
       </div>
       <div style="margin-top:1mm;font-size:8pt;">
@@ -266,7 +310,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
     <div class="payment-section">
       <div class="section-title">PAYMENT / الدفع</div>
       <div class="total-row">
-        <span style="font-weight:bold;text-transform:uppercase;">${sale.payment_method}</span>
+        <span style="font-weight:900;text-transform:uppercase;">${sale.payment_method}</span>
         <span>Method:</span>
       </div>
       ${
@@ -284,7 +328,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
     }
 
     <div class="footer">
-      <p style="font-weight:bold;">THANK YOU / شكرا لك</p>
+      <p style="font-weight:900;">THANK YOU / شكرا لك</p>
       <p>WELCOME BACK / أهلا بك مجددا</p>
       <p style="margin-top:1mm;font-size:7pt;">${formatDateTime(
         new Date().toISOString(),
@@ -312,14 +356,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       <div className="bg-white w-96 shadow-xl">
         {/* On‑screen preview (short) */}
         <div className="p-4 font-mono text-sm leading-tight text-black">
-          {/* You can keep your existing preview layout here, or simplify */}
           <div className="text-center mb-2 border-b border-dashed border-black pb-2">
             <h1 className="text-base font-bold">Apex POS System</h1>
             <p className="text-[11px]">
               Apex Group International
             </p>
-            <p className="text-[11px] font-arabic">
-              مجموعة أبكس الدولية
+            <p className="text-[12px] font-bold font-arabic">
+              شركة مجموعة ابكس انترناشيونال للتجارة العامة و المقاولات
             </p>
           </div>
           <p className="text-xs mb-1">
