@@ -10,7 +10,6 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.18",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
@@ -24,6 +23,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",

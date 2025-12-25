@@ -22,7 +22,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
 app.use(express.json());
 // ✅ JWT CONFIG
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-12345';
@@ -120,6 +119,29 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Login failed' });
   }
 });
+app.post('/api/debug-login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const result = await query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
+
+    if (!user) return res.json({ error: 'User not found', found: false });
+
+
+    const match = await bcryptjs.compare(password, user.password_hash);
+
+    res.json({ 
+      found: true, 
+      username: user.username, 
+      hash_preview: user.password_hash.substring(0, 30) + '...',
+      password_match: match,
+      full_hash: user.password_hash
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // GET /api/auth/me - ✅ UPDATED: Protected, verify JWT
 app.get('/api/auth/me', authenticateJWT, (req, res) => {
