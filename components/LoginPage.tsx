@@ -128,16 +128,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-xs font-semibold text-slate-700 mb-2">📋 Demo Credentials:</p>
-            <div className="space-y-1 text-xs">
-              <p><span className="font-medium text-slate-600">Admin:</span> <code className="bg-white px-2 py-1 rounded">admin</code> / <code className="bg-white px-2 py-1 rounded">admin123</code></p>
-              <p><span className="font-medium text-slate-600">Cashier:</span> <code className="bg-white px-2 py-1 rounded">cashier1</code> / <code className="bg-white px-2 py-1 rounded">cashier123</code></p>
-            </div>
+          
           </div>
         </div>
       </div>
-    </div>
+    
   );
 };
