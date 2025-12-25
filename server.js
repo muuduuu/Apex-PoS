@@ -682,11 +682,15 @@ app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
     }
 
     // Generate sale number
-    const saleNumberResult = await query(
-      "SELECT LPAD((COALESCE(MAX(CAST(SUBSTRING(sale_number FROM 11) AS INTEGER)), 0) + 1)::text, 6, '0') as next_num FROM sales WHERE sale_number LIKE 'SALE-2025-%'"
-    );
-    const sale_number = `SALE-2025-${saleNumberResult.rows[0].next_num}`;
-
+  const saleNumberResult = await query(`
+  SELECT COALESCE(MAX(
+    CASE 
+      WHEN sale_number ~ '^[0-9]+$' THEN sale_number::INTEGER
+      ELSE 0 
+    END
+  ), 0) + 1 as next_num FROM sales
+`);
+const sale_number = `${saleNumberResult.rows[0].next_num}`;
     // Create sale
     const saleResult = await query(
       `INSERT INTO sales (sale_number, user_id, contractor_id, subtotal, discount_amount, discount_percentage, total_amount, payment_method, notes, status, sale_date)
