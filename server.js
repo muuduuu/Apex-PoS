@@ -303,9 +303,14 @@ app.post('/api/sales', authenticateJWT, async (req, res) => {
       notes,
     } = req.body;
 
-const saleNumberResult = await query(
-  "SELECT COALESCE(MAX(CAST(sale_number AS INTEGER)), 0) + 1 as next_num FROM sales"
-);
+const saleNumberResult = await query(`
+  SELECT COALESCE(MAX(
+    CASE 
+      WHEN sale_number ~ '^[0-9]+$' THEN sale_number::INTEGER
+      ELSE 0 
+    END
+  ), 0) + 1 as next_num FROM sales
+`);
 const nextNum = saleNumberResult.rows[0].next_num;
 const sale_number = `${nextNum}`;  // Just "1", "2", "3"...
 
@@ -363,7 +368,7 @@ app.get('/api/sales', authenticateJWT, async (req, res) => {
           'quantity', si.quantity,
           'unit_price', si.unit_price,
           'line_total', si.line_total
-        )) as items
+        )) FILTER (WHERE si.id IS NOT NULL) as items
       FROM sales s
       LEFT JOIN users u ON s.user_id = u.id
       LEFT JOIN contractors c ON s.contractor_id = c.id
@@ -386,7 +391,6 @@ app.get('/api/sales', authenticateJWT, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch sales' });
   }
 });
-
 // GET /api/sales/:saleNumber - ✅ UPDATED: Protected
 app.get('/api/sales/:saleNumber', authenticateJWT, async (req, res) => {
   try {
