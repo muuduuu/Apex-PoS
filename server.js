@@ -303,11 +303,12 @@ app.post('/api/sales', authenticateJWT, async (req, res) => {
       notes,
     } = req.body;
 
-    const saleNumberResult = await query(
-      "SELECT LPAD((COALESCE(MAX(CAST(SUBSTRING(sale_number FROM 11) AS INTEGER)), 0) + 1)::text, 6, '0') as next_num FROM sales WHERE sale_number LIKE 'SALE-2025-%'"
-    );
-    const nextNum = saleNumberResult.rows[0].next_num;
-    const sale_number = `SALE-2025-${nextNum}`;
+const saleNumberResult = await query(
+  "SELECT COALESCE(MAX(CAST(sale_number AS INTEGER)), 0) + 1 as next_num FROM sales"
+);
+const nextNum = saleNumberResult.rows[0].next_num;
+const sale_number = `${nextNum}`;  // Just "1", "2", "3"...
+
 
     // ✅ UPDATED: Use req.user.id instead of hardcoded 1
     const saleResult = await query(
