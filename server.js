@@ -840,6 +840,24 @@ app.get('/api/credit-report/:contractorId', authenticateJWT, async (req, res) =>
     res.status(500).json({ error: 'Failed to fetch credit report' });
   }
 });
+app.get('/api/users', authenticateJWT, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const result = await query(`
+      SELECT id, username, role, created_at 
+      FROM users 
+      ORDER BY created_at DESC
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
 // ==================== AUDIT LOGS ====================
 
 // GET /api/audit-logs - ✅ UPDATED: Protected, admin only
