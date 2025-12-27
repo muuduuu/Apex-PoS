@@ -108,6 +108,9 @@ class APIClient {
   }
 
 // ==================== ITEMS ====================
+export const getContractors = () => apiClient.get<Contractor[]>('/contractors');
+export const createContractor = (data: Partial<Contractor>) => 
+  apiClient.post<Contractor>('/contractors', data);
 
 async getUsers(): Promise<User[]> {
   const response = await fetch(`${API_BASE}/users`, {

@@ -5,6 +5,8 @@ export interface User {
   username: string;
   name: string;
   role: UserRole;
+  created_at?: string;  // ✅ ADD THIS LINE
+
 }
 // src/types/index.ts
 export interface Contractor {
@@ -18,6 +20,16 @@ export interface Contractor {
   total_credits: number;
   status: 'active' | 'inactive';
   created_at: string;
+}
+export interface Contractor {
+  id: number;
+  name: string;
+  company_name?: string;
+  phone?: string;
+  email?: string;
+  credit_limit: number;
+  total_credits: number;
+  status: 'active' | 'inactive';
 }
 
 export interface CreditTransaction {

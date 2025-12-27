@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../services/apiClient';
-import { DailyReport, User, Item, AuditLog } from '../types';
+import { DailyReport, User, Item, AuditLog, Contractor } from '../types';
 import {
   BarChart,
   CreditCard,
@@ -23,11 +23,14 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'audit' | 'users'>('overview');
+const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'contractors' | 'audit' | 'users'>('overview');
   const [report, setReport] = useState<DailyReport | null>(null);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
 
   // Inventory State
   const [items, setItems] = useState<Item[]>([]);
@@ -81,6 +84,10 @@ useEffect(() => {
         setLoading(false);
         return;
       }
+      else if (activeTab === 'contractors') {
+  const contractorsData = await apiClient.getContractors();
+  setContractors(contractorsData);
+}
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch data');
       console.error('Dashboard fetch error:', err);
@@ -238,6 +245,40 @@ useEffect(() => {
     }
   };
 
+    const handleCreateContractor = async (e: React.FormEvent) => {
+      e.preventDefault();
+    
+      const formData = new FormData(e.target as HTMLFormElement);
+      const name = formData.get('contractor_name') as string;
+      const company = formData.get('company') as string;
+      const phone = formData.get('phone') as string;
+      const creditLimit = parseFloat(formData.get('credit_limit') as string);
+
+      if (!name) {
+        alert('Contractor name is required');
+        return;
+      }
+
+      try {
+        const newContractor = await apiClient.createContractor({
+          name,
+          company_name: company || '',
+          phone: phone || '',
+          credit_limit: creditLimit || 0,
+          status: 'active',
+        });
+      
+        setContractors([...contractors, newContractor]);
+        setSelectedContractor(newContractor);
+        alert('Contractor created successfully');
+      
+        // Reset form
+        (e.target as HTMLFormElement).reset();
+      } catch (err) {
+        alert('Failed to create contractor: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      }
+    };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e8f4f8] via-slate-100 to-[#d4e9f7] flex flex-col">
       {/* Header */}
@@ -285,6 +326,16 @@ useEffect(() => {
             Inventory
           </button>
           <button
+  onClick={() => setActiveTab('contractors')}
+  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
+    activeTab === 'contractors'
+      ? 'bg-gradient-to-r from-[#0b51a1] to-[#26aae1] shadow-lg text-white transform scale-105'
+      : 'text-slate-500 hover:text-[#0b51a1] hover:bg-white/50'
+  }`}
+>
+  Contractors
+</button>
+          <button
             onClick={() => setActiveTab('users')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
               activeTab === 'users'
@@ -294,6 +345,7 @@ useEffect(() => {
           >
             Users
           </button>
+
           <button
             onClick={() => setActiveTab('audit')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
@@ -304,6 +356,7 @@ useEffect(() => {
           >
             Audit Logs
           </button>
+
         </div>
 
         <div className="flex items-center gap-4">
@@ -676,12 +729,171 @@ useEffect(() => {
               </tbody>
             </table>
           </div>
+        )} : activeTab === 'contractors' ? (
+  /* CONTRACTORS TAB */
+  <div className="animate-in fade-in slide-in-from-right duration-500">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      {/* CREATE CONTRACTOR FORM */}
+      <div className="lg:max-w-md">
+        <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
+          <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
+            <UsersIcon className="w-5 h-5 text-[#26aae1]" /> Add Contractor
+          </h2>
+          
+          
+      <form onSubmit={handleCreateContractor} className="space-y-4">
+  <div>
+    <label className="block text-sm font-medium text-slate-700 mb-1">Contractor Name *</label>
+    <input
+      type="text"
+      name="contractor_name"
+      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1]"
+      placeholder="e.g., Ahmed Al-Mansoori"
+      required
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-slate-700 mb-1">Company</label>
+    <input 
+      type="text" 
+      name="company"
+      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1]" 
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+    <input 
+      type="tel" 
+      name="phone"
+      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1]" 
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-slate-700 mb-1">Credit Limit (KWD)</label>
+    <input
+      type="number"
+      name="credit_limit"
+      step="0.01"
+      min="0"
+      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1]"
+      placeholder="10000"
+    />
+  </div>
+  
+  <button
+    type="submit"
+    className="w-full bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white py-2.5 rounded-lg hover:shadow-lg"
+  >
+    Create Contractor
+  </button>
+</form>
+
+        </div>
+      </div>
+        
+      {/* CONTRACTORS LIST + DETAILS */}
+      <div>
+        <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20 mb-6">
+          <h2 className="text-lg font-bold text-[#0b51a1] mb-6">
+            Contractors ({contractors.length})
+          </h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500">Name</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500">Phone</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 text-right">Credit Limit</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 text-right">Outstanding</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {contractors.map(contractor => (
+                  <tr 
+                    key={contractor.id}
+                    className="hover:bg-slate-50 cursor-pointer"
+                    onClick={() => setSelectedContractor(contractor)}
+                  >
+                    <td className="py-3 px-4 font-medium">{contractor.name}</td>
+                    <td className="py-3 px-4">{contractor.phone}</td>
+                    <td className="py-3 px-4 text-right font-mono text-green-600 font-bold">
+                      {format2(contractor.credit_limit)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-red-600 font-bold">
+                      {format2(contractor.total_credits)}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        contractor.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {contractor.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SELECTED CONTRACTOR DETAILS */}
+        {selectedContractor && (
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl shadow-lg border border-red-200">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">{selectedContractor.name}</h3>
+                <p className="text-sm text-slate-500">{selectedContractor.company_name}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedContractor(null)}
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6 text-sm">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-600">Phone:</span>
+                  <span className="font-medium">{selectedContractor.phone}</span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-600">Email:</span>
+                  <span>{selectedContractor.email}</span>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-600">Credit Limit:</span>
+                  <span className="font-bold text-green-600">{format2(selectedContractor.credit_limit)} KWD</span>
+                </div>
+                <div className="flex justify-between mb-4">
+                  <span className="text-slate-600">Outstanding:</span>
+                  <span className="font-bold text-red-600">{format2(selectedContractor.total_credits)} KWD</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+              <h4 className="font-bold text-slate-800 mb-2">Credit History (Last 10)</h4>
+              {/* Add credit history table here */}
+            </div>
+          </div>
         )}
       </div>
     </div>
   </div>
-
-        ) : (
+        
+      </div>
+    </div>
+  </div> ) : (
           /* AUDIT LOG TAB */
           <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20 animate-in fade-in slide-in-from-left duration-500">
             <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
