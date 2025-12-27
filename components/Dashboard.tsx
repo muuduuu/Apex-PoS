@@ -60,39 +60,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const format2 = (v: any) => Number(v || 0).toFixed(2);
 
   // Fetch data based on active tab
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        if (activeTab === 'overview') {
-          const data = await apiClient.getDailyReport(date);
-          setReport(data);
-        } 
-         else if (activeTab === 'users') {
-  try {
-    const usersData = await apiClient.getUsers();
-    setUsers(usersData);
-  } catch (err) {
-    console.log('Users endpoint not available yet:', err.message);
-    setUsers([]); // Show empty table instead of crashing
-  }
-}
-  else if (activeTab === 'inventory') {
-          const itemsData = await apiClient.getItems();
-          setItems(itemsData);
-        } else if (activeTab === 'audit') {
-          const logsData = await apiClient.getAuditLogs();
-          setLogs(logsData);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
-        console.error('Dashboard fetch error:', err);
+// Fetch data based on active tab
+useEffect(() => {
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (activeTab === 'overview') {
+        const data = await apiClient.getDailyReport(date);
+        setReport(data);
+      } else if (activeTab === 'inventory') {
+        const itemsData = await apiClient.getItems();
+        setItems(itemsData);
+      } else if (activeTab === 'audit') {
+        const logsData = await apiClient.getAuditLogs();
+        setLogs(logsData);
+      } else if (activeTab === 'users') {
+        // SKIP USERS FETCH - endpoint not ready
+        setUsers([]);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    };
-    fetchData();
-  }, [date, activeTab]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      console.error('Dashboard fetch error:', err);
+    }
+    setLoading(false);
+  };
+  fetchData();
+}, [date, activeTab]);
+
 
   const handleExport = async () => {
     try {
