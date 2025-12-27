@@ -39,6 +39,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     name_ar: '',
     price_per_unit: '',
   });
+ 
+
   const [itemLoading, setItemLoading] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
 
@@ -51,6 +53,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [newRole, setNewRole] = useState<'cashier' | 'admin'>('cashier');
   const [userLoading, setUserLoading] = useState(false);
   const [userSuccess, setUserSuccess] = useState('');
+  const [users, setUsers] = useState<User[]>([]);
+
 
   const format3 = (v: any) => Number(v || 0).toFixed(3);
   const format2 = (v: any) => Number(v || 0).toFixed(2);
@@ -64,7 +68,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         if (activeTab === 'overview') {
           const data = await apiClient.getDailyReport(date);
           setReport(data);
-        } else if (activeTab === 'inventory') {
+        } 
+         else if (activeTab === 'users') {
+  const usersData = await apiClient.getUsers();  // NEW API CALL
+  setUsers(usersData);
+}
+  else if (activeTab === 'inventory') {
           const itemsData = await apiClient.getItems();
           setItems(itemsData);
         } else if (activeTab === 'audit') {
@@ -546,75 +555,130 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </div>
         ) : activeTab === 'users' ? (
           /* USERS TAB */
-          <div className="grid grid-cols-1 max-w-md mx-auto animate-in fade-in slide-in-from-bottom duration-500">
-            <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
-              <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
-                <UsersIcon className="w-5 h-5 text-[#26aae1]" /> Create New User
-              </h2>
+  <div className="animate-in fade-in slide-in-from-bottom duration-500">
+    {/* Create User Form */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="lg:max-w-md">
+        <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
+          <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
+            <UsersIcon className="w-5 h-5 text-[#26aae1]" /> Create New User
+          </h2>
 
-              <form onSubmit={handleCreateUser} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
-                    value={newUsername}
-                    onChange={e => setNewUsername(e.target.value)}
-                    placeholder="e.g., cashier1"
-                    required
-                    disabled={userLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    placeholder="Enter secure password"
-                    required
-                    disabled={userLoading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Role
-                  </label>
-                  <select
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
-                    value={newRole}
-                    onChange={e => setNewRole(e.target.value as 'cashier' | 'admin')}
-                    disabled={userLoading}
-                  >
-                    <option value="cashier">Cashier</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={userLoading}
-                  className="w-full bg-gradient-to-r from-[#0b51a1] to-[#26aae1] hover:shadow-lg text-white text-sm font-semibold py-2.5 rounded-lg disabled:opacity-60 transition-all duration-300 transform hover:scale-105"
-                >
-                  {userLoading ? 'Creating User...' : 'Create User'}
-                </button>
-              </form>
-
-              <div className="mt-6 p-4 bg-gradient-to-r from-[#0b51a1]/10 to-[#26aae1]/10 rounded-lg border border-[#26aae1]/20">
-                <p className="text-xs text-[#0b51a1]">
-                  <strong>ℹ️ Tip:</strong> Create cashier accounts for POS operators. Each user gets
-                  their own login credentials.
-                </p>
-              </div>
+          <form onSubmit={handleCreateUser} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
+                value={newUsername}
+                onChange={e => setNewUsername(e.target.value)}
+                placeholder="e.g., cashier1"
+                required
+                disabled={userLoading}
+              />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Enter secure password"
+                required
+                disabled={userLoading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Role
+              </label>
+              <select
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#26aae1] focus:border-[#0b51a1] outline-none transition-all duration-200"
+                value={newRole}
+                onChange={e => setNewRole(e.target.value as 'cashier' | 'admin')}
+                disabled={userLoading}
+              >
+                <option value="cashier">Cashier</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              disabled={userLoading}
+              className="w-full bg-gradient-to-r from-[#0b51a1] to-[#26aae1] hover:shadow-lg text-white text-sm font-semibold py-2.5 rounded-lg disabled:opacity-60 transition-all duration-300 transform hover:scale-105"
+            >
+              {userLoading ? 'Creating User...' : 'Create User'}
+            </button>
+          </form>
+
+          <div className="mt-6 p-4 bg-gradient-to-r from-[#0b51a1]/10 to-[#26aae1]/10 rounded-lg border border-[#26aae1]/20">
+            <p className="text-xs text-[#0b51a1]">
+              <strong>ℹ️ Tip:</strong> Create cashier accounts for POS operators.
+            </p>
           </div>
+        </div>
+      </div>
+
+      {/* Users List */}
+      <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20">
+        <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
+          <UsersIcon className="w-5 h-5 text-[#26aae1]" /> All Users ({users.length})
+        </h2>
+        
+        {userLoading && users.length === 0 ? (
+          <div className="text-center py-8 text-slate-500">Loading users...</div>
+        ) : (
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase">Username</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase">Role</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase">Created</th>
+                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {users.map(user => (
+                  <tr key={user.id} className="hover:bg-slate-50">
+                    <td className="py-3 px-4 text-sm font-medium text-slate-800">
+                      {user.username}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        user.role === 'admin' 
+                          ? 'bg-[#0b51a1]/10 text-[#0b51a1] border border-[#0b51a1]/30' 
+                          : 'bg-green-100 text-green-800 border border-green-200'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-slate-500 font-mono">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+
         ) : (
           /* AUDIT LOG TAB */
           <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20 animate-in fade-in slide-in-from-left duration-500">

@@ -107,9 +107,16 @@ class APIClient {
     return handleResponse<User>(response);
   }
 
-  // ==================== ITEMS ====================
+// ==================== ITEMS ====================
 
-  async getItems(): Promise<Item[]> {
+async getUsers(): Promise<User[]> {
+  const response = await fetch(`${API_BASE}/users`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse<User[]>(response);
+}
+
+async getItems(): Promise<Item[]> {
     const response = await fetch(`${API_BASE}/items`, {
       headers: getAuthHeaders(),
     });
