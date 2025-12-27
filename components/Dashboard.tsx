@@ -729,7 +729,11 @@ useEffect(() => {
               </tbody>
             </table>
           </div>
-        )} : activeTab === 'contractors' ? (
+        )}
+      </div>
+    </div>
+  </div>
+        ) : activeTab === 'contractors' ? (
   /* CONTRACTORS TAB */
   <div className="animate-in fade-in slide-in-from-right duration-500">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
