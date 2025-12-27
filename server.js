@@ -680,7 +680,21 @@ app.post('/api/credit-sales', authenticateJWT, async (req, res) => {
         error: `Credit limit exceeded. Current: ${contractor.total_credits}, Limit: ${contractor.credit_limit}, Would be: ${newTotalCredits}`
       });
     }
-
+app.get('/api/users', authenticateAdmin, async (req, res) => {
+  try {
+    const users = await db.query(`
+      SELECT id, username, role, created_at 
+      FROM users 
+      WHERE username != $1  -- Exclude current logged-in admin if needed
+      ORDER BY created_at DESC
+    `, ['admin']); // or whatever your main admin username is
+    
+    res.json(users.rows);
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
     // Generate sale number
   const saleNumberResult = await query(`
   SELECT COALESCE(MAX(
