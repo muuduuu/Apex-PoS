@@ -894,10 +894,7 @@ useEffect(() => {
       </div>
     </div>
   </div>
-        
-      </div>
-    </div>
-  </div> ) : (
+ ) : (
           /* AUDIT LOG TAB */
           <div className="bg-gradient-to-br from-white to-[#e8f4f8] p-6 rounded-xl shadow-lg border border-[#26aae1]/20 animate-in fade-in slide-in-from-left duration-500">
             <h2 className="text-lg font-bold text-[#0b51a1] flex items-center gap-2 mb-6">
