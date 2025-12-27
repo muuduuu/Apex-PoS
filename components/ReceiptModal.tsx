@@ -35,7 +35,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html, body {
-      width:76mm; /* Reduced from 80mm to fit printer */
+      width:76mm;
       margin:0;
       padding:0;
       background:#fff;
@@ -43,11 +43,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       font-size:9pt;
       line-height:1.3;
       color:#000;
+      font-weight: 900; /* GLOBAL BOLD */
     }
     .receipt { 
       width:76mm; 
-      padding:2mm 3mm 2mm 4mm; /* LEFT: 4mm padding fix cut-off */
+      padding:2mm 3mm 2mm 4mm;
       min-height:100vh;
+      font-weight: 900; /* EXTRA BOLD */
     }
     .header {
       text-align:center;
@@ -55,30 +57,60 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       padding-bottom:1mm;
       border-bottom:1px dashed #000;
     }
-    .header h1 { font-size:11pt; font-weight:bold; margin-bottom:0.5mm; }
-    .header .sub-en { font-size:8pt; margin-bottom:0.5mm; }
-    .header .sub-ar { font-size:10pt; font-weight:bold; margin-bottom:1mm; }
-    .header .contact { font-size:7pt; margin-top:1mm; line-height:1.4; }
+    .header h1 { 
+      font-size:11pt; 
+      font-weight: 900; /* EXTRA BOLD */
+      margin-bottom:0.5mm; 
+    }
+    .header .sub-en { 
+      font-size:8pt; 
+      font-weight: 900;
+      margin-bottom:0.5mm; 
+    }
+    .header .sub-ar { 
+      font-size:10pt; 
+      font-weight: 900;
+      margin-bottom:1mm; 
+    }
+    .header .contact { 
+      font-size:7pt; 
+      font-weight: 900;
+      margin-top:1mm; 
+      line-height:1.4; 
+    }
     .receipt-type {
       text-align:center;
       margin:2mm 0;
       padding:1mm 0;
       border-top:1px dashed #000;
       border-bottom:1px dashed #000;
-      font-weight:bold;
+      font-weight: 900;
       font-size:9pt;
     }
-    .info-section { margin-bottom:3mm; font-size:8pt; }
+    .info-section { 
+      margin-bottom:3mm; 
+      font-size:8pt;
+      font-weight: 900;
+    }
     .info-row, .info-row-ar {
       display:flex;
       justify-content:space-between;
       margin-bottom:1mm;
+      font-weight: 900; /* INFO LABELS + VALUES BOLD */
     }
-    .info-row-ar { direction:rtl; text-align:right; font-size:9pt; }
-    .items-section { margin-bottom:3mm; }
+    .info-row-ar { 
+      direction:rtl; 
+      text-align:right; 
+      font-size:9pt; 
+      font-weight: 900;
+    }
+    .items-section { 
+      margin-bottom:3mm; 
+      font-weight: 900;
+    }
     .section-title {
       text-align:center;
-      font-weight:bold;
+      font-weight: 900;
       font-size:8pt;
       padding:1mm 0;
       border-top:1px dashed #000;
@@ -90,62 +122,49 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       border-collapse:collapse; 
       font-size:8pt; 
       table-layout:fixed;
+      font-weight: 900; /* TABLE CONTENTS BOLD */
     }
     th { 
       text-align:left; 
       border-bottom:1px solid #000; 
       padding:0.8mm 0; 
-      font-weight:bold;
+      font-weight: 900;
       font-size:9pt;
-      font-weight: 900; /* Extra bold headers */
     }
     th.qty { text-align:center; }
     th.price { text-align:right; }
     td { 
-      padding:0.6mm 0; /* Reduced padding */
+      padding:0.6mm 0;
       border-bottom:1px dashed #ccc; 
-      font-weight: 900; /* ALL ITEMS EXTRA BOLD */
+      font-weight: 900;
     }
-    td.item-name-en { 
-      font-size:8.5pt; /* Slightly smaller to fit */
-      font-weight: 900; /* EXTRA BOLD */
-      padding-right: 1mm;
+    td.item-name-en, td.item-name-ar, td.qty, td.price { 
+      font-weight: 900 !important;
     }
-    td.item-name-ar { 
-      font-size:9pt; 
-      font-weight: 900; /* EXTRA BOLD */
-      padding-right: 1mm;
-      direction: rtl;
+    .totals-section { 
+      margin-bottom:3mm; 
+      font-weight: 900;
     }
-    td.qty { 
-      text-align:center; 
-      font-weight: 900; /* EXTRA BOLD */
-      font-size:9pt;
-      width: 15%; /* Fixed width */
-    }
-    td.price { 
-      text-align:right; 
-      font-weight: 900; /* EXTRA BOLD */
-      font-size:9pt;
-      width: 20%; /* Fixed width */
-    }
-    .totals-section { margin-bottom:3mm; }
     .total-row {
       display:flex;
       justify-content:space-between;
       font-size:8pt;
       margin-bottom:1mm;
-      font-weight: 700; /* Bold totals */
+      font-weight: 900; /* TOTALS BOLD */
     }
     .total-row.final {
-      font-weight: 900; /* EXTRA BOLD final total */
+      font-weight: 900;
       font-size:10pt;
       border-top:1px solid #000;
       border-bottom:1px solid #000;
       padding:1mm 0;
       margin:2mm 0;
     }
-    .payment-section { margin-bottom:3mm; font-size:8pt; }
+    .payment-section { 
+      margin-bottom:3mm; 
+      font-size:8pt;
+      font-weight: 900;
+    }
     .footer {
       text-align:center;
       margin-top:4mm;
@@ -153,12 +172,17 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ sale, refund, onClos
       border-top:1px solid #000;
       font-size:8pt;
       line-height:1.6;
+      font-weight: 900; /* FOOTER BOLD */
     }
-    .footer p { margin:0 0 1mm 0; }
+    .footer p { 
+      margin:0 0 1mm 0; 
+      font-weight: 900;
+    }
     @page { size:76mm auto; margin:0; }
     @media print {
       body { margin: 0 !important; }
       .receipt { padding: 2mm 3mm 2mm 4mm !important; }
+      * { font-weight: 900 !important; } /* PRINT EXTRA BOLD */
     }
   </style>
 </head>
