@@ -70,8 +70,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           setReport(data);
         } 
          else if (activeTab === 'users') {
-  const usersData = await apiClient.getUsers();  // NEW API CALL
-  setUsers(usersData);
+  try {
+    const usersData = await apiClient.getUsers();
+    setUsers(usersData);
+  } catch (err) {
+    console.log('Users endpoint not available yet:', err.message);
+    setUsers([]); // Show empty table instead of crashing
+  }
 }
   else if (activeTab === 'inventory') {
           const itemsData = await apiClient.getItems();
