@@ -79,11 +79,15 @@ useEffect(() => {
         const logsData = await apiClient.getAuditLogs();
         setLogs(logsData);
       } else if (activeTab === 'users') {
-        // SKIP USERS FETCH - endpoint not ready
-        setUsers([]);
-        setLoading(false);
-        return;
-      }
+  try {
+    const usersData = await apiClient.getUsers();  // ✅ Fetch users
+    setUsers(usersData);
+  } catch (err) {
+    console.error('Failed to fetch users:', err);
+    setUsers([]);  // Fallback to empty
+  }
+  setLoading(false);
+}
       else if (activeTab === 'contractors') {
   const contractorsData = await apiClient.getContractors();
   setContractors(contractorsData);
@@ -688,9 +692,9 @@ useEffect(() => {
           <UsersIcon className="w-5 h-5 text-[#26aae1]" /> All Users ({users.length})
         </h2>
         
-        {userLoading && users.length === 0 ? (
-          <div className="text-center py-8 text-slate-500">Loading users...</div>
-        ) : (
+        {loading && users.length === 0 ? (
+  <div className="text-center py-8 text-slate-500">Loading users...</div>
+) : (
           <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
             <table className="w-full text-left border-collapse">
               <thead>
