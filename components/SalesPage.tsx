@@ -138,6 +138,14 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
     setCart(newCart);
   };
 
+  const updateCartItemPrice = (index: number, newPrice: number) => {
+    if (newPrice < 0) return;
+    const newCart = [...cart];
+    newCart[index].unit_price = newPrice;
+    newCart[index].line_total = newCart[index].quantity * newPrice;
+    setCart(newCart);
+  };
+
   const removeFromCart = (index: number) => {
     const newCart = [...cart];
     newCart.splice(index, 1);
@@ -538,8 +546,17 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                             }
                           />
                         </td>
-                        <td className="p-4 text-right text-slate-600 font-mono">
-                          {Number(item.unit_price).toFixed(3)} KWD / د.ك
+                        <td className="p-4 text-right">
+                          <input
+                            type="text"
+                            placeholder="Price"
+                            className="w-32 p-2 border border-slate-300 rounded text-right focus:ring-2 focus:ring-[#3d579f] outline-none font-medium bg-white font-mono"
+                            value={item.unit_price}
+                            onChange={e =>
+                              updateCartItemPrice(idx, parseFloat(e.target.value) || 0)
+                            }
+                          />
+                          <div className="text-xs text-slate-500 text-right mt-1">KWD / د.ك</div>
                         </td>
                         <td className="p-4 text-right font-bold text-slate-800 font-mono">
                           {Number(item.line_total).toFixed(3)} KWD / د.ك
