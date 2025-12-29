@@ -469,15 +469,16 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                 </label>
                 <input
                   id="qtyInput"
-                  type="text"
-                  placeholder="Enter quantity"
+                  type="number"
+                  min="0.5"
+                  step="0.5"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579f] outline-none text-center font-bold text-lg"
                   value={qtyInput}
                   onChange={e => setQtyInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAddItem()}
                 />
               </div>
-              <button
+              <button 
                 onClick={handleAddItem}
                 disabled={!selectedItemId}
                 className="w-full md:w-auto bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white px-8 py-3 rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-bold transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 hover:-translate-y-0.5"
