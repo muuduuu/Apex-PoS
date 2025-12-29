@@ -455,7 +455,9 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                   Unit Price (KWD) / سعر الوحدة
                 </label>
                 <input
-                  type="text"
+                  type="number"
+                  min="0"
+                  step="0.001"
                   placeholder="Enter price"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579f] outline-none text-center font-bold text-lg"
                   value={customPrice}
@@ -561,7 +563,9 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                         </td>
                         <td className="p-4 text-right">
                           <input
-                            type="text"
+                            type="number"
+                            min="0"
+                            step="0.001"
                             placeholder="Price"
                             className="w-32 p-2 border border-slate-300 rounded text-right focus:ring-2 focus:ring-[#3d579f] outline-none font-medium bg-white font-mono"
                             value={item.unit_price}
