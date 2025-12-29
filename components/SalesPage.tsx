@@ -409,22 +409,13 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                   >
                     <div className="font-bold text-lg mb-1">{item.name_en}</div>
                     <div
-                      className={`text-sm mb-2 font-arabic ${
+                      className={`text-sm font-arabic ${
                         selectedItemId === item.id.toString()
                           ? 'text-white/90'
                           : 'text-slate-500'
                       }`}
                     >
                       {item.name_ar}
-                    </div>
-                    <div
-                      className={`font-mono font-medium ${
-                        selectedItemId === item.id.toString()
-                          ? 'text-white'
-                          : 'text-[#3d579f]'
-                      }`}
-                    >
-                      {Number(item.price_per_unit).toFixed(3)} KWD / د.ك
                     </div>
                     {selectedItemId === item.id.toString() && (
                       <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
@@ -454,7 +445,7 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                   <option value="">-- Select Product / اختر منتج --</option>
                   {items.map(item => (
                     <option key={item.id} value={item.id}>
-                      {item.name_en} - {Number(item.price_per_unit).toFixed(3)} KWD / د.ك
+                      {item.name_en}
                     </option>
                   ))}
                 </select>
