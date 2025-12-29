@@ -41,6 +41,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const [cart, setCart] = useState<SaleItem[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [qtyInput, setQtyInput] = useState<string>('1');
+  const [customPrice, setCustomPrice] = useState<string>('');
 
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -96,8 +97,9 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     const item = items.find(i => i.id === parseInt(selectedItemId));
     const qty = parseFloat(qtyInput);
+    const price = customPrice ? parseFloat(customPrice) : Number(item?.price_per_unit || 0);
 
-    if (item && qty > 0) {
+    if (item && qty > 0 && price > 0) {
       const existingItemIndex = cart.findIndex(i => i.item_id === item.id);
 
       if (existingItemIndex >= 0) {
@@ -114,18 +116,20 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
             item_name_en: item.name_en,
             item_name_ar: item.name_ar,
             quantity: qty,
-            unit_price: Number(item.price_per_unit),
-            line_total: qty * Number(item.price_per_unit),
+            unit_price: price,
+            line_total: qty * price,
           },
         ]);
       }
       setSelectedItemId('');
       setQtyInput('1');
+      setCustomPrice('');
     }
   };
 
   const handleQuickSelect = (item: Item) => {
     setSelectedItemId(item.id.toString());
+    setCustomPrice(item.price_per_unit.toString());
     const qtyInputEl = document.getElementById('qtyInput');
     if (qtyInputEl) qtyInputEl.focus();
   };
@@ -441,7 +445,11 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                 <select
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579f] outline-none bg-slate-50"
                   value={selectedItemId}
-                  onChange={e => setSelectedItemId(e.target.value)}
+                  onChange={e => {
+                    setSelectedItemId(e.target.value);
+                    const item = items.find(i => i.id === parseInt(e.target.value));
+                    if (item) setCustomPrice(item.price_per_unit.toString());
+                  }}
                 >
                   <option value="">-- Select Product / اختر منتج --</option>
                   {items.map(item => (
@@ -450,6 +458,19 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="w-full md:w-40">
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
+                  Unit Price (KWD) / سعر الوحدة
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter price"
+                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3d579f] outline-none text-center font-bold text-lg"
+                  value={customPrice}
+                  onChange={e => setCustomPrice(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddItem()}
+                />
               </div>
               <div className="w-full md:w-40">
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
