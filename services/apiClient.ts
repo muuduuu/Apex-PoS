@@ -359,6 +359,26 @@ async getCreditReport(contractorId: number) {
     return handleResponse<AuditLog[]>(response);
   }
 
+  // ==================== REPORTS ====================
+
+  async generateSalesReport(startDate: string, endDate: string): Promise<void> {
+    const url = new URL(`${API_BASE}/reports/sales-excel`);
+    url.searchParams.append('start_date', startDate);
+    url.searchParams.append('end_date', endDate);
+    
+    const response = await fetch(url.toString(), {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new APIError(response.status, 'Failed to generate sales report');
+    }
+
+    const blob = await response.blob();
+    const filename = `sales_report_${startDate}_to_${endDate}.xlsx`;
+    this.downloadBlob(blob, filename);
+  }
+
   // ==================== UTILITY ====================
 
   downloadBlob(blob: Blob, filename: string): void {

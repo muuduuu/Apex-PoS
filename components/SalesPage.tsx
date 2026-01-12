@@ -25,6 +25,7 @@ import LogoImage from '../src/images/Apex Logo.png';
 
 import { CreditSalesModal } from './CreditSalesModal';
 import { CreditPaymentModal } from './CreditPaymentModal';
+import { SalesReportModal } from './SalesReportModal';
 
 interface SalesPageProps {
   user: User;
@@ -66,6 +67,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ user, onLogout }) => {
   const [refundError, setRefundError] = useState<string>('');
 const [showCreditSalesModal, setShowCreditSalesModal] = useState(false);
 const [showPaymentModal, setShowPaymentModal] = useState(false);
+const [showReportModal, setShowReportModal] = useState(false);
 
   // Sales History State
   const [showSalesHistory, setShowSalesHistory] = useState(false);
@@ -338,6 +340,13 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:shadow-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5"
+          >
+            <Calendar className="w-4 h-4" />
+            <span className="hidden md:inline">Sales Report / تقرير المبيعات</span>
+          </button>
           <button
             onClick={() => setShowSalesHistory(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0b51a1] to-[#26aae1] text-white rounded-lg hover:shadow-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5"
@@ -1037,6 +1046,12 @@ const [showPaymentModal, setShowPaymentModal] = useState(false);
       setShowPaymentModal(false);
       // Optionally show a toast or refresh sales/contractors
     }}
+  />
+)}
+
+{showReportModal && (
+  <SalesReportModal
+    onClose={() => setShowReportModal(false)}
   />
 )}
 

@@ -14,8 +14,10 @@ import {
   Trash2,
   X,
   Users as UsersIcon,
+  FileSpreadsheet,
 } from 'lucide-react';
 import LogoImage from '../src/images/Apex Logo.png';
+import { SalesReportModal } from './SalesReportModal';
 
 interface DashboardProps {
   user: User;
@@ -57,6 +59,7 @@ const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(
   const [userLoading, setUserLoading] = useState(false);
   const [userSuccess, setUserSuccess] = useState('');
   const [users, setUsers] = useState<User[]>([]);
+  const [showReportModal, setShowReportModal] = useState(false);
 
 
   const format3 = (v: any) => Number(v || 0).toFixed(3);
@@ -364,6 +367,13 @@ useEffect(() => {
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:shadow-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Sales Report</span>
+          </button>
           <button
             onClick={onLogout}
             className="text-sm text-slate-500 hover:text-[#ff6b35] font-medium px-4 py-2 hover:bg-red-50 rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
@@ -1077,6 +1087,12 @@ useEffect(() => {
             </div>
           </div>
         </div>
+      )}
+
+      {showReportModal && (
+        <SalesReportModal
+          onClose={() => setShowReportModal(false)}
+        />
       )}
     </div>
   );
