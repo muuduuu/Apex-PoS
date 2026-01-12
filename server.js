@@ -4,7 +4,7 @@ import cors from 'cors';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from './lib/db.js';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 
 console.log('DB INFO:', {
   DATABASE_URL: process.env.DATABASE_URL,
